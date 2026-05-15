@@ -20,6 +20,8 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, FastAPI
+from shared.logging import setup_logging
+from shared.middleware import RequestResponseMiddleware
 
 # from google.api_core.exceptions import NotFound
 from sqlalchemy import text
@@ -32,8 +34,6 @@ from app.auth.infrastructure.http.exception_mapper import (
     register_auth_exception_handlers,
 )
 from app.config import settings
-from app.core.logging import setup_logging
-from app.core.middleware import RequestResponseMiddleware
 from app.rbac.infrastructure.http import routes as rbac_routes
 from app.rbac.infrastructure.http.exception_mapper import (
     register_rbac_exception_handlers,

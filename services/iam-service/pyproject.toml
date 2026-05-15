@@ -17,6 +17,7 @@ dependencies = [
     "pydantic-settings>=2.11.0",
     "pyjwt[crypto]>=2.11.0",
     "redis>=7.0.1",
+    "shared",
     "sqlalchemy>=2.0.48",
 ]
 
@@ -29,6 +30,9 @@ dev = [
     "pytest-cov>=7.0.0",
     "ruff>=0.15.4",
 ]
+
+[tool.uv.sources]
+shared = { workspace = true }
 
 [tool.ruff]
 line-length = 88

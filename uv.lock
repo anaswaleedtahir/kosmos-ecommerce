@@ -98,16 +98,20 @@ source = { virtual = "services/catalog-service" }
 dependencies = [
     { name = "alembic" },
     { name = "asyncpg" },
+    { name = "cryptography" },
     { name = "fastapi", extra = ["standard"] },
+    { name = "google-cloud-pubsub" },
+    { name = "greenlet" },
+    { name = "httpx" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "pyjwt", extra = ["crypto"] },
     { name = "shared" },
     { name = "sqlalchemy" },
 ]
 
 [package.dev-dependencies]
 dev = [
-    { name = "httpx" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
@@ -118,16 +122,20 @@ dev = [
 requires-dist = [
     { name = "alembic", specifier = ">=1.16.5" },
     { name = "asyncpg", specifier = ">=0.31.0" },
+    { name = "cryptography", specifier = ">=46.0.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.128.8" },
+    { name = "google-cloud-pubsub", specifier = ">=2.35.0" },
+    { name = "greenlet", specifier = ">=3.2.5" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pydantic-settings", specifier = ">=2.11.0" },
+    { name = "pyjwt", extras = ["crypto"], specifier = ">=2.11.0" },
     { name = "shared", editable = "packages/shared" },
     { name = "sqlalchemy", specifier = ">=2.0.48" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "httpx", specifier = ">=0.28.1" },
     { name = "pytest", specifier = ">=8.4.2" },
     { name = "pytest-asyncio", specifier = ">=1.2.0" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
@@ -609,6 +617,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "pyjwt", extra = ["crypto"] },
     { name = "redis" },
+    { name = "shared" },
     { name = "sqlalchemy" },
 ]
 
@@ -636,6 +645,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.11.0" },
     { name = "pyjwt", extras = ["crypto"], specifier = ">=2.11.0" },
     { name = "redis", specifier = ">=7.0.1" },
+    { name = "shared", editable = "packages/shared" },
     { name = "sqlalchemy", specifier = ">=2.0.48" },
 ]
 
@@ -1320,6 +1330,7 @@ dependencies = [
     { name = "cryptography" },
     { name = "pydantic" },
     { name = "pyjwt", extra = ["crypto"] },
+    { name = "starlette" },
 ]
 
 [package.metadata]
@@ -1327,6 +1338,7 @@ requires-dist = [
     { name = "cryptography", specifier = ">=46.0.5" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pyjwt", extras = ["crypto"], specifier = ">=2.11.0" },
+    { name = "starlette", specifier = ">=0.46.0" },
 ]
 
 [[package]]

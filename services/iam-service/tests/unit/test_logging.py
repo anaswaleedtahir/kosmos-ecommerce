@@ -3,8 +3,7 @@ import logging
 import sys
 
 import pytest
-
-from app.core.logging import JSONFormatter, setup_logging
+from shared.logging import JSONFormatter, setup_logging
 
 
 @pytest.fixture
