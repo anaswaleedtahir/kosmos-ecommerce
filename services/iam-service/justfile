@@ -1,7 +1,7 @@
 set positional-arguments
 
 runserver:
-    uv run uvicorn app.main:app --reload
+    uv run uvicorn app.main:app --reload --port 8000
 
 test *PYTEST_ARGS:
     if [ "${1:-}" = "--" ]; then shift; fi; uv run pytest "$@"

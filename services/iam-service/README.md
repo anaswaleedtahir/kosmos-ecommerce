@@ -1,123 +1,82 @@
-# Access Control Service
+# IAM Service
 
-A comprehensive access control system built with FastAPI, SQLAlchemy, and Pydantic that provides role-based authentication and authorization.
+Authentication, authorization, and audit logging for the Kosmos platform. Runs on **port 8000**.
 
-## Features
+## What it does
 
-- **User Management**: Secure user registration, authentication, and profile management
-- **Role-Based Access Control (RBAC)**: Flexible role assignment and management
-- **Token Authentication**: JWT-based authentication with refresh token rotation
-- **Fine-Grained Permissions**: Resource and action-based permission system
-- **Database Integration**: Asynchronous PostgreSQL with SQLAlchemy ORM
-- **Caching**: Redis integration for token management and caching
-- **Event Streaming**: Google Cloud Pub/Sub for audit logging and notifications
+- Issues RS256 JWTs for authenticated users
+- Enforces role-based access control (RBAC) — roles carry scoped permissions like `catalog:write`
+- Exposes a JWKS endpoint so other services can verify tokens without calling back
+- Keeps an append-only audit log of every RBAC change
 
-## Architecture
+## Quick start
 
-The service follows **hexagonal (ports & adapters) architecture** across three bounded contexts:
-
-- **Domain layer** — pure Python dataclasses and `typing.Protocol` ports; no SQLAlchemy, FastAPI, or Redis
-- **Application layer** — one class per use case (`SignupUseCase`, `LoginUseCase`, `CreateRoleUseCase`, …) that depend only on ports
-- **Infrastructure layer** — adapters: SQLAlchemy repositories, Redis stores, FastAPI routes, JWT crypto
-
-```
-app/
-├── auth/        # Signup, login, refresh, logout — JWT + bcrypt
-├── rbac/        # Roles, permissions, user-role assignments — RBAC
-├── audit/       # Audit log reads
-├── shared/      # Cross-cutting: entities, value objects, domain events, infra utils
-└── core/        # Logging, middleware, context
-```
-
-Domain events decouple RBAC from Audit: use cases emit typed events (`RoleCreated`, `PermissionGranted`, …); the Unit of Work dispatches them to the audit logger after commit.
-
-See [`docs/01-system-architecture.md`](docs/01-system-architecture.md) for the full architecture reference.
-
-## Installation
-
-1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd access-control-service
-```
-
-2. Install dependencies:
-```bash
-uv venv
-uv sync
-```
-
-3. Set up environment variables:
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
-
-4. Generate RSA keys for JWT:
-```bash
+# Generate RSA keys (one-time)
 mkdir keys
 openssl genrsa -out keys/private_key.pem 2048
 openssl rsa -in keys/private_key.pem -pubout -out keys/public_key.pem
+
+# Copy and fill in env vars
+cp .env.example .env
+
+# Run migrations and start
+just migrate
+just runserver          # http://localhost:8000
 ```
 
-5. Run database migrations:
+Interactive docs: `http://localhost:8000/docs`
+
+## Environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | asyncpg PostgreSQL DSN |
+| `REDIS_URL` | Redis DSN |
+| `PRIVATE_KEY_PATH` | Path to RSA private key (default: `keys/private_key.pem`) |
+| `PUBLIC_KEY_PATH` | Path to RSA public key (default: `keys/public_key.pem`) |
+| `GCP_PROJECT_ID` | GCP project for Pub/Sub |
+| `PUBSUB_TOPIC_ID` | Pub/Sub topic for audit events |
+| `JWT_ISSUER` | Issuer claim in JWTs (default: `access-control-service`) |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Access token TTL (default: 15) |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | Refresh token TTL (default: 7) |
+
+## API
+
+### Auth
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/v1/auth/signup` | Register a new user |
+| `POST` | `/api/v1/auth/login` | Get access + refresh tokens |
+| `POST` | `/api/v1/auth/refresh` | Rotate refresh token (httpOnly cookie) |
+| `POST` | `/api/v1/auth/logout` | Revoke tokens |
+| `GET`  | `/api/v1/auth/me` | Current user info |
+| `GET`  | `/.well-known/jwks.json` | Public key — consumed by other services |
+
+### Admin (super user only)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/v1/admin/roles` | Create a role |
+| `DELETE` | `/api/v1/admin/roles/{id}` | Delete a role |
+| `POST` | `/api/v1/admin/roles/{id}/permissions` | Assign permission to role |
+| `DELETE` | `/api/v1/admin/roles/{id}/permissions` | Revoke permission from role |
+| `POST` | `/api/v1/admin/users/{id}/roles` | Assign role to user |
+| `DELETE` | `/api/v1/admin/users/{id}/roles/{role_id}` | Revoke role from user |
+| `GET` | `/api/v1/audit/logs` | Paginated audit trail |
+
+## Token flow
+
+1. `POST /login` returns an access token (JWT, 15 min) in the response body and a refresh token in an httpOnly cookie.
+2. Include the access token as `Authorization: Bearer <token>` on every protected request.
+3. When the access token expires, call `POST /refresh` — a new pair is issued and the old refresh token is revoked.
+4. `POST /logout` immediately invalidates both tokens.
+
+## Running tests
+
 ```bash
-alembic upgrade head
+uv run pytest tests/unit/ -v                   # no database needed
+uv run pytest tests/integration/ -v            # needs TEST_DATABASE_URL set
+uv run pytest --cov=app --cov-report=term-missing
 ```
-
-## Usage
-
-Start the application:
-```bash
-uvicorn app.main:app --reload
-```
-
-The API documentation will be available at `http://localhost:8000/docs`.
-
-## API Endpoints
-
-- `POST /api/v1/auth/signup` — Register a new user
-- `POST /api/v1/auth/login` — Authenticate and receive access + refresh tokens
-- `POST /api/v1/auth/logout` — Revoke tokens
-- `POST /api/v1/auth/refresh` — Rotate refresh token
-- `GET /api/v1/auth/me` — Current user info
-- `GET /.well-known/jwks.json` — Public key for JWT verification
-- `POST /api/v1/admin/roles` — Create role (super user only)
-- `DELETE /api/v1/admin/roles/{id}` — Delete role
-- `POST /api/v1/admin/roles/{id}/permissions` — Assign permission
-- `DELETE /api/v1/admin/roles/{id}/permissions` — Revoke permission
-- `POST /api/v1/admin/users/{id}/roles` — Assign role to user
-- `DELETE /api/v1/admin/users/{id}/roles/{role_id}` — Revoke role from user
-- `GET /api/v1/admin/audit-logs` — Paginated audit trail
-
-## Documentation Standards
-
-This project follows Python documentation best practices:
-
-- **Google Style Docstrings**: Used throughout the codebase for consistency
-- **Type Hints**: Comprehensive type annotations for all functions and variables
-- **Module Documentation**: Each module includes a descriptive docstring
-- **Class Documentation**: All classes have detailed docstrings explaining their purpose
-- **Function Documentation**: All public functions include parameter, return, and exception documentation
-- **Examples**: Code examples included where helpful
-
-## Technologies
-
-- **FastAPI**: Modern, fast web framework for building APIs
-- **SQLAlchemy**: SQL toolkit and Object Relational Mapper
-- **Pydantic**: Data validation and settings management
-- **Redis**: In-memory data structure store
-- **PostgreSQL**: Advanced open-source database
-- **JWT**: Secure token-based authentication
-- **Google Cloud Pub/Sub**: Messaging service for event streaming
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes with proper documentation
-4. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
