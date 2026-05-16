@@ -1,8 +1,13 @@
+set positional-arguments
+
 runserver:
     uv run uvicorn app.main:app --reload
 
+test *PYTEST_ARGS:
+    if [ "${1:-}" = "--" ]; then shift; fi; uv run pytest "$@"
+
 makemigrations message:
-    alembic revision --autogenerate -m "{{message}}"
+    uv run alembic revision --autogenerate -m "{{ message }}"
 
 migrate:
-    alembic upgrade head
+    uv run alembic upgrade head

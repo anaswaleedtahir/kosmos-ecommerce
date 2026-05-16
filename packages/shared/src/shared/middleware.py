@@ -24,7 +24,11 @@ class RequestResponseMiddleware(BaseHTTPMiddleware):
     ) -> Response:
         start = time.perf_counter()
         client_id = request.headers.get("X-Request-ID")
-        rid = client_id if _valid_request_id(client_id) else str(uuid.uuid4())
+        rid = (
+            client_id
+            if (client_id and _valid_request_id(client_id))
+            else str(uuid.uuid4())
+        )
         token = request_id.set(rid)
         try:
             response = await call_next(request)
