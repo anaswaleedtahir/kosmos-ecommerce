@@ -1,6 +1,18 @@
-# Shop-Monorepo
+# Kosmos
+Luxury cosmetics ecommerce platform. A monorepo of Python microservices with a Next.js storefront, built to explore microservices architecture, event-driven communication, and cloud-native patterns.
+This is a learning project. Decisions are documented as ADRs in `docs/adr/` — see them for tradeoff reasoning.
 
-Ecommerce platform. Four Python microservices sharing infrastructure, managed as a `uv` workspace and a PWA (Progressive Web Application) in Next.js.
+## Architecture
+```
+[ Browser ] → [ Next.js (BFF) ] → [ FastAPI services ]
+                                   ├── iam-service        :8000   Auth, RBAC, JWKS
+                                   ├── catalog-service    :8001   Products, search
+                                   ├── order-service      :8002   Cart, orders, payments
+                                   └── notification-service :8003  Async event consumers
+                                         ↑
+                                   [ GCP Pub/Sub ]
+```
+Each service owns its own database. Services authenticate requests independently via JWT signature verification against `iam-service's` JWKS endpoint. Cross-service communication is event-driven via Pub/Sub where eventual consistency is acceptable, synchronous HTTP where command semantics are required.
 
 ## What's in the box
 
@@ -49,6 +61,6 @@ Python 3.13 · FastAPI · SQLAlchemy 2 (async) · Alembic · PostgreSQL 17 · Re
 
 ## Where to go next
 
-- **IAM service deep dive** → [`services/iam-service/CLAUDE.md`](services/iam-service/CLAUDE.md)
-- **API contracts** → [`services/iam-service/openapi/openapi.yaml`](services/iam-service/openapi/openapi.yaml)
-- **Architecture docs** → [`services/iam-service/docs/`](services/iam-service/docs/)
+- **Services deep dive** → [`services/**/CONTEXT.md`](services/**/CONTEXT.md)
+- **API contracts** → [`services/**/openapi/openapi.yaml`](services/**/openapi/openapi.yaml)
+- **Architecture docs** → [`docs/architecture`](docs/architecture/)
