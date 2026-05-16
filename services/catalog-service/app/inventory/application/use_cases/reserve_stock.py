@@ -1,8 +1,5 @@
 from app.inventory.application.dto import InventoryResult, ReserveStockInput
-from app.inventory.domain.exceptions import (
-    InsufficientStockError,
-    InventoryNotFoundError,
-)
+from app.inventory.domain.exceptions import InventoryNotFoundError
 from app.inventory.domain.ports.unit_of_work import InventoryUnitOfWorkFactory
 
 
@@ -15,9 +12,6 @@ class ReserveStockUseCase:
             inv = await uow.inventory.find_by_variant_id(input.variant_id)
             if not inv:
                 raise InventoryNotFoundError()
-
-            if input.quantity > inv.available:
-                raise InsufficientStockError(inv.available, input.quantity)
 
             inv.reserve(input.quantity)
             await uow.inventory.save(inv)

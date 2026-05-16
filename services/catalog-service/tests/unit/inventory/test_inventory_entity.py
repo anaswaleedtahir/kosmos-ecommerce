@@ -2,7 +2,8 @@ import uuid
 
 import pytest
 
-from app.inventory.domain.events import InventoryDepleted
+from app.inventory.domain.events import InventoryDepleted, InventoryRestocked
+from app.inventory.domain.exceptions import InsufficientStockError
 from tests.unit.inventory.fakes import make_inventory
 
 
@@ -74,11 +75,14 @@ def test_reserve_does_not_emit_depleted_even_when_available_hits_zero():
     assert inv.collect_events() == []
 
 
-def test_reserve_raises_when_exceeding_available():
+def test_reserve_raises_typed_insufficient_stock_error():
     inv = make_inventory(on_hand=5, reserved=2)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(InsufficientStockError) as exc_info:
         inv.reserve(4)
+
+    assert exc_info.value.available == 3
+    assert exc_info.value.requested == 4
 
 
 def test_restock_rejects_non_positive():
@@ -86,3 +90,26 @@ def test_restock_rejects_non_positive():
 
     with pytest.raises(ValueError):
         inv.restock(0)
+
+
+def test_restock_emits_restocked_when_rising_from_zero():
+    inv = make_inventory(on_hand=0, reserved=0)
+    actor_id = uuid.uuid4()
+
+    inv.restock(7, actor_id=actor_id)
+
+    events = inv.collect_events()
+    assert len(events) == 1
+    assert isinstance(events[0], InventoryRestocked)
+    assert events[0].quantity_added == 7
+    assert events[0].quantity_on_hand == 7
+    assert events[0].actor_id == actor_id
+    assert events[0].variant_id == inv.variant_id
+
+
+def test_restock_does_not_emit_when_already_in_stock():
+    inv = make_inventory(on_hand=5, reserved=0)
+
+    inv.restock(3)
+
+    assert inv.collect_events() == []

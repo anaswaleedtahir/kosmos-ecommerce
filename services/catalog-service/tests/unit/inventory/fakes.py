@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import datetime, timezone
+from typing import Callable
 
 from app.inventory.domain.entities.inventory import Inventory
 from app.inventory.domain.events import InventoryEvent
@@ -21,11 +22,20 @@ def make_inventory(
     )
 
 
+def _noop_track(_: Inventory) -> None:
+    pass
+
+
 class FakeInventoryRepository:
-    def __init__(self, records: list[Inventory] | None = None) -> None:
+    def __init__(
+        self,
+        records: list[Inventory] | None = None,
+        on_save: Callable[[Inventory], None] = _noop_track,
+    ) -> None:
         self._store: dict[uuid.UUID, Inventory] = {
             inv.variant_id: inv for inv in (records or [])
         }
+        self._on_save = on_save
 
     async def find_by_variant_id(self, variant_id: uuid.UUID) -> Inventory | None:
         return self._store.get(variant_id)
@@ -37,29 +47,42 @@ class FakeInventoryRepository:
 
     async def save(self, inventory: Inventory) -> None:
         self._store[inventory.variant_id] = inventory
+        self._on_save(inventory)
 
 
 class FakeInventoryUnitOfWork:
     def __init__(self, inventory: FakeInventoryRepository | None = None) -> None:
         self.inventory = inventory or FakeInventoryRepository()
+        self.inventory._on_save = self._track
         self.committed = False
         self._events: list[InventoryEvent] = []
+        self._tracked: list[Inventory] = []
         self.emitted_events: list[InventoryEvent] = []
 
     async def __aenter__(self) -> "FakeInventoryUnitOfWork":
         self._events = []
+        self._tracked = []
         return self
 
     async def __aexit__(self, exc_type: object, *args: object) -> None:
         if exc_type:
+            for entity in self._tracked:
+                entity.collect_events()
+            self._tracked.clear()
             self._events.clear()
 
     async def commit(self) -> None:
+        for entity in self._tracked:
+            self._events.extend(entity.collect_events())
+        self._tracked.clear()
         self.committed = True
         self.emitted_events.extend(self._events)
         self._events.clear()
 
     async def rollback(self) -> None:
+        for entity in self._tracked:
+            entity.collect_events()
+        self._tracked.clear()
         self._events.clear()
 
     def add_event(self, event: InventoryEvent) -> None:
@@ -69,3 +92,7 @@ class FakeInventoryUnitOfWork:
         events = self._events[:]
         self._events.clear()
         return events
+
+    def _track(self, entity: Inventory) -> None:
+        if not any(e is entity for e in self._tracked):
+            self._tracked.append(entity)

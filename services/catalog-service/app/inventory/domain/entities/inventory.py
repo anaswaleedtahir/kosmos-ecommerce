@@ -2,7 +2,12 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from app.inventory.domain.events import InventoryDepleted, InventoryEvent
+from app.inventory.domain.events import (
+    InventoryDepleted,
+    InventoryEvent,
+    InventoryRestocked,
+)
+from app.inventory.domain.exceptions import InsufficientStockError
 
 
 @dataclass
@@ -20,17 +25,27 @@ class Inventory:
 
     def reserve(self, qty: int) -> None:
         if qty > self.available:
-            raise ValueError(f"Cannot reserve {qty}: only {self.available} available")
+            raise InsufficientStockError(available=self.available, requested=qty)
         self.quantity_reserved += qty
 
     def release(self, qty: int) -> None:
         release_qty = min(qty, self.quantity_reserved)
         self.quantity_reserved -= release_qty
 
-    def restock(self, qty: int) -> None:
+    def restock(self, qty: int, *, actor_id: uuid.UUID | None = None) -> None:
         if qty <= 0:
             raise ValueError("Restock quantity must be positive")
+        was_depleted = self.quantity_on_hand == 0
         self.quantity_on_hand += qty
+        if was_depleted and self.quantity_on_hand > 0:
+            self._events.append(
+                InventoryRestocked(
+                    actor_id=actor_id,
+                    variant_id=self.variant_id,
+                    quantity_added=qty,
+                    quantity_on_hand=self.quantity_on_hand,
+                )
+            )
 
     def commit_reservation(
         self, qty: int, *, actor_id: uuid.UUID | None = None

@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from app.inventory.domain.entities.inventory import Inventory
 from app.inventory.domain.events import InventoryEvent
 from app.inventory.infrastructure.repositories.sqlalchemy_inventory_repository import (
     SqlAlchemyInventoryRepository,
@@ -11,11 +12,15 @@ class SqlAlchemyInventoryUnitOfWork:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self._session_factory = session_factory
         self._events: list[InventoryEvent] = []
+        self._tracked: list[Inventory] = []
 
     async def __aenter__(self) -> "SqlAlchemyInventoryUnitOfWork":
         self._session = self._session_factory()
-        self.inventory = SqlAlchemyInventoryRepository(self._session)
+        self.inventory = SqlAlchemyInventoryRepository(
+            self._session, on_save=self._track
+        )
         self._events = []
+        self._tracked = []
         return self
 
     async def __aexit__(self, exc_type: object, *args: object) -> None:
@@ -25,12 +30,18 @@ class SqlAlchemyInventoryUnitOfWork:
 
     async def commit(self) -> None:
         await self._session.commit()
+        for entity in self._tracked:
+            self._events.extend(entity.collect_events())
+        self._tracked.clear()
         events = self.collect_events()
         for event in events:
             await publish_event(event.event_type, event.to_pubsub_payload())
 
     async def rollback(self) -> None:
         await self._session.rollback()
+        for entity in self._tracked:
+            entity.collect_events()
+        self._tracked.clear()
         self._events.clear()
 
     def add_event(self, event: InventoryEvent) -> None:
@@ -40,3 +51,7 @@ class SqlAlchemyInventoryUnitOfWork:
         events = self._events[:]
         self._events.clear()
         return events
+
+    def _track(self, entity: Inventory) -> None:
+        if not any(e is entity for e in self._tracked):
+            self._tracked.append(entity)

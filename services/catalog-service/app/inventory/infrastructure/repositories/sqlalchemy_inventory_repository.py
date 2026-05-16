@@ -1,4 +1,5 @@
 import uuid
+from typing import Callable
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,9 +9,18 @@ from app.inventory.infrastructure.orm.inventory import Inventory as InventoryORM
 from app.inventory.infrastructure.repositories.mappers import _inventory_orm_to_domain
 
 
+def _noop_track(_: Inventory) -> None:
+    pass
+
+
 class SqlAlchemyInventoryRepository:
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(
+        self,
+        session: AsyncSession,
+        on_save: Callable[[Inventory], None] = _noop_track,
+    ) -> None:
         self._session = session
+        self._on_save = on_save
 
     async def find_by_variant_id(self, variant_id: uuid.UUID) -> Inventory | None:
         result = await self._session.execute(
@@ -34,3 +44,4 @@ class SqlAlchemyInventoryRepository:
         orm.quantity_on_hand = inventory.quantity_on_hand
         orm.quantity_reserved = inventory.quantity_reserved
         self._session.add(orm)
+        self._on_save(inventory)
