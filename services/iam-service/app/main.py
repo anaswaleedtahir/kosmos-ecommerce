@@ -1,5 +1,5 @@
 """
-Main FastAPI application for the access control service.
+Main FastAPI application for the identity and access management service.
 
 This module defines the FastAPI application with lifespan management for handling
 startup and shutdown events. It manages connections to various services including
@@ -18,6 +18,7 @@ Example:
 
 import logging
 from contextlib import asynccontextmanager
+from typing import Awaitable, cast
 
 from fastapi import APIRouter, FastAPI
 from shared.logging import setup_logging
@@ -103,7 +104,7 @@ async def lifespan(app: FastAPI):
 
     # 4. connect to redis
     try:
-        await redis_client.ping()
+        await cast(Awaitable[bool], redis_client.ping())
         logger.info("Redis connection established")
     except Exception as e:
         raise RuntimeError(f"Redis connection failed: {e}")
@@ -129,7 +130,7 @@ async def lifespan(app: FastAPI):
     logger.info("Database connections closed")
 
     # 2. close redis connection
-    await redis_client.aclose()
+    await cast(Awaitable[None], redis_client.aclose())
     logger.info("Redis connection closed")
 
     # 3. stop the pub/sub connection
@@ -138,7 +139,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Access Control Service",
+    title="Identity & Access Management Service",
     version="1.0.0",
     description="Authentication, authorization, and identity management",
     docs_url="/docs" if settings.app_env.lower() != "production" else None,
