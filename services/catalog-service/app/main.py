@@ -2,7 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, FastAPI
-from shared.logging import setup_logging
+from shared.logging import setup_dev_logging, setup_logging
 from shared.middleware import RequestResponseMiddleware
 from sqlalchemy import text
 
@@ -23,7 +23,9 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if not settings.app_debug:
+    if settings.app_debug:
+        setup_dev_logging()
+    else:
         setup_logging(settings.log_level)
 
     logger.info("Starting up catalog-service...")

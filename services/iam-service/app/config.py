@@ -58,8 +58,8 @@ class Settings(BaseSettings):
     )
 
     # ──────────── APPLICATION ──────────── #
-    app_env: str = "development"
-    app_name: str = "access-control-service"
+    app_env: str = "production"
+    app_name: str = "iam-service"
     app_debug: bool = False
     log_level: str = "INFO"
 
@@ -72,7 +72,7 @@ class Settings(BaseSettings):
 
     # ──────────── JWT ──────────── #
     jwt_algorithm: str = "RS256"
-    jwt_issuer: str = "access-control-service"
+    jwt_issuer: str = "iam-service"
     jwt_access_token_expire_minutes: int = 15
     jwt_refresh_token_expire_days: int = 7
 

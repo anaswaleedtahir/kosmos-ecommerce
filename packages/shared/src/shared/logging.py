@@ -75,6 +75,35 @@ class JSONFormatter(logging.Formatter):
         return json.dumps(log_data, default=str)
 
 
+def setup_dev_logging() -> None:
+    """Configure root logger with a simple text formatter at DEBUG level.
+
+    Use in development (app_debug=True). Silences noisy third-party loggers
+    the same way setup_logging does, but outputs human-readable text instead of JSON.
+    """
+    root_logger = logging.getLogger()
+
+    formatter = logging.Formatter(
+        fmt="%(asctime)s %(levelname)-8s %(name)s — %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(formatter)
+
+    for existing_handler in root_logger.handlers[:]:
+        root_logger.removeHandler(existing_handler)
+        existing_handler.close()
+
+    root_logger.setLevel(logging.DEBUG)
+    root_logger.addHandler(handler)
+
+    for logger_name in LOGGERS_TO_SILENCE:
+        third_party_logger = logging.getLogger(logger_name)
+        third_party_logger.handlers.clear()
+        third_party_logger.setLevel(logging.WARNING)
+        third_party_logger.propagate = True
+
+
 def setup_logging(log_level: str) -> None:
     """Configure root logger with a JSON stdout handler.
 
