@@ -32,7 +32,6 @@ from app.catalog.infrastructure.composition import (
     get_update_product_use_case,
     get_update_variant_use_case,
 )
-from app.catalog.infrastructure.http.dependencies import require_catalog_write
 from app.catalog.infrastructure.http.schemas import (
     CategoryCreate,
     CategoryResponse,
@@ -44,6 +43,7 @@ from app.catalog.infrastructure.http.schemas import (
     VariantCreate,
     VariantUpdate,
 )
+from app.shared.infrastructure.http.dependencies import require_catalog_write
 
 router = APIRouter(prefix="/catalog", tags=["catalog"])
 

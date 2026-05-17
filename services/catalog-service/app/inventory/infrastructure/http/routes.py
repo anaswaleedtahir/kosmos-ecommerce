@@ -2,7 +2,6 @@ import uuid
 
 from fastapi import APIRouter, Depends, status
 
-from app.catalog.infrastructure.http.dependencies import require_catalog_write
 from app.inventory.application.dto import (
     ReleaseReservationInput,
     ReserveStockInput,
@@ -26,6 +25,7 @@ from app.inventory.infrastructure.http.schemas import (
     ReserveRequest,
     RestockRequest,
 )
+from app.shared.infrastructure.http.dependencies import require_catalog_write
 
 router = APIRouter(prefix="/inventory", tags=["inventory"])
 
