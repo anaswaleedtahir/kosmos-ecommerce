@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -16,6 +17,7 @@ from app.inventory.infrastructure.http.exception_mapper import (
     register_inventory_exception_handlers,
 )
 from app.shared.infrastructure.db.session import async_engine
+from app.shared.infrastructure.events.pubsub_publisher import ensure_topic
 from app.shared.infrastructure.http.jwks import jwks_client
 
 logger = logging.getLogger(__name__)
@@ -42,6 +44,12 @@ async def lifespan(app: FastAPI):
         logger.info("Database connection established")
     except Exception as e:
         raise RuntimeError(f"Database connection failed: {e}")
+
+    try:
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, ensure_topic)
+    except Exception as e:
+        raise RuntimeError(f"Pub/Sub topic init failed: {e}")
 
     yield
 

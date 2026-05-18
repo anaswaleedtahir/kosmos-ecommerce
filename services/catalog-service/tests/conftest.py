@@ -1,5 +1,6 @@
 import os
 from collections.abc import AsyncGenerator
+from unittest.mock import AsyncMock, patch
 
 import pytest
 import pytest_asyncio
@@ -42,8 +43,17 @@ async def db(engine, create_tables) -> AsyncGenerator[AsyncSession, None]:
         await session.commit()
 
 
+@pytest.fixture
+def mock_pubsub():
+    with patch(
+        "app.shared.infrastructure.events.pubsub_publisher.publish_event",
+        new_callable=AsyncMock,
+    ) as mock:
+        yield mock
+
+
 @pytest_asyncio.fixture
-async def client(db) -> AsyncGenerator[AsyncClient, None]:
+async def client(db, mock_pubsub) -> AsyncGenerator[AsyncClient, None]:
     from unittest.mock import MagicMock
 
     from app.main import app

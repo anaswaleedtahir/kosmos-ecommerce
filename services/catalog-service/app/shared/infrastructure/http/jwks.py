@@ -1,5 +1,7 @@
 """JWKS client that fetches and caches IAM's public key at startup."""
 
+from typing import Any
+
 import httpx
 import jwt
 from jwt.algorithms import RSAAlgorithm
@@ -11,7 +13,7 @@ class JwksClient:
     """Fetches the RS256 public key from IAM's JWKS endpoint and caches it."""
 
     def __init__(self) -> None:
-        self._public_key: object | None = None
+        self._public_key: Any = None
 
     async def load(self) -> None:
         async with httpx.AsyncClient() as client:
@@ -28,7 +30,7 @@ class JwksClient:
         raise RuntimeError(f"No RSA key found in JWKS at {settings.iam_jwks_url}")
 
     @property
-    def public_key(self) -> object:
+    def public_key(self) -> Any:
         if self._public_key is None:
             raise RuntimeError("JWKS not loaded — call load() at startup")
         return self._public_key

@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     # ──────────── GCP ──────────── #
     gcp_project_id: str = Field(default=...)
     pubsub_topic_id: str = Field(default=...)
+    pubsub_emulator_host: str | None = None  # set to host:port to use local emulator
 
 
 settings = Settings()
