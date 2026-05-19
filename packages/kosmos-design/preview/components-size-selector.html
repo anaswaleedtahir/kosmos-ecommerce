@@ -1,0 +1,28 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+  .row { display:flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .pill {
+    height: 44px; padding: 0 18px;
+    border: 1px solid var(--line);
+    display: inline-flex; align-items: center;
+    font-family: var(--font-sans); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 200ms cubic-bezier(0.2,0,0,1), color 200ms cubic-bezier(0.2,0,0,1);
+  }
+  .pill .price { color: var(--smoke); margin-left: 10px; font-size: 12px; letter-spacing: 0.04em; text-transform: none; }
+  .pill.is-selected { border-color: var(--ink); }
+  .pill.is-disabled { color: var(--smoke); text-decoration: line-through; cursor: not-allowed; }
+</style>
+</head>
+<body>
+<div class="card-stage">
+  <div class="label" style="margin-bottom: 14px">Size selector — hard‑edge pills, 1px border, no fill. Selected = ink border.</div>
+  <div class="row">
+    <div class="pill">30 ml <span class="price">€ 140</span></div>
+    <div class="pill is-selected">50 ml <span class="price">€ 220</span></div>
+    <div class="pill">100 ml <span class="price">€ 320</span></div>
+    <div class="pill is-disabled">200 ml <span class="price">sold out</span></div>
+  </div>
+</div>
+</body></html>

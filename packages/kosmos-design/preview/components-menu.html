@@ -1,0 +1,41 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+  body { padding: 0; }
+  .stage { display: flex; }
+  .panel { flex: 1; padding: 28px 32px; }
+  .panel + .panel { border-left: 1px solid var(--line); }
+  .panel--dark { background: var(--ink); color: var(--cream); }
+  .panel--dark + .panel { border-left-color: rgba(255,255,255,0.18); }
+  ul { list-style: none; margin: 0; padding: 0; }
+  ul li { padding: 10px 0; }
+  ul li a { font-family: var(--font-display); font-weight: 300; font-size: 24px; }
+  .panel--dark ul li a { color: var(--cream); }
+  .eyebrow { font-family: var(--font-sans); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--smoke); margin-bottom: 16px; }
+  .panel--dark .eyebrow { color: rgba(255,255,255,0.5); }
+</style>
+</head>
+<body>
+<div class="card-stage">
+  <div class="stage">
+    <div class="panel">
+      <div class="eyebrow">Mega menu · cream</div>
+      <ul>
+        <li><a href="#">Fragrance</a></li>
+        <li><a href="#">Skin</a></li>
+        <li><a href="#">Lipstick</a></li>
+        <li><a href="#">The Maison</a></li>
+      </ul>
+    </div>
+    <div class="panel panel--dark">
+      <div class="eyebrow">On dark photography</div>
+      <ul>
+        <li><a href="#">Fragrance</a></li>
+        <li><a href="#">Skin</a></li>
+        <li><a href="#">Lipstick</a></li>
+        <li><a href="#">The Maison</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+  body { background: var(--ink); color: var(--cream); }
+  .lbl { font-family: var(--font-sans); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+  .k-btn--inverse { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+  .k-btn--ghost-on-ink { background: transparent; color: var(--cream); border: 1px solid rgba(255,255,255,0.4); }
+  .row-b { display:flex; gap: 18px; align-items: flex-end; }
+  .col-b { display:flex; flex-direction: column; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="card-stage">
+  <div class="row-b">
+    <div class="col-b">
+      <span class="lbl">Inverse · default</span>
+      <button class="k-btn k-btn--inverse">Shop the edition</button>
+    </div>
+    <div class="col-b">
+      <span class="lbl">Ghost on ink</span>
+      <button class="k-btn k-btn--ghost-on-ink">Discover</button>
+    </div>
+    <div class="col-b">
+      <span class="lbl">Link on ink</span>
+      <a href="#" style="color:var(--cream); font-family: var(--font-sans); font-size: 13px; text-transform:uppercase; letter-spacing: 0.18em; border-bottom: 1px solid var(--cream); padding-bottom: 4px">Receive the journal</a>
+    </div>
+  </div>
+  <div class="lbl" style="margin-top: 14px">Buttons used over dark photography. Hover inverts to transparent/cream border.</div>
+</div>
+</body></html>

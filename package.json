@@ -1,0 +1,16 @@
+{
+  "name": "kosmos-ecommerce",
+  "private": true,
+  "engines": {
+    "node": ">=22.14.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @kosmos/web dev",
+    "build": "pnpm --filter @kosmos/design build && pnpm --filter @kosmos/web build",
+    "lint": "pnpm -r lint"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["sharp", "unrs-resolver"]
+  }
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <circle cx="60" cy="60" r="58" stroke="currentColor" stroke-width="1" fill="none"></circle>
+  <circle cx="60" cy="60" r="52" stroke="currentColor" stroke-width="1" fill="none"></circle>
+  <path id="circle-text" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0" fill="none"></path>
+  <text font-family="&#39;Inter&#39;, sans-serif" font-size="8" letter-spacing="3" fill="currentColor">
+    <textPath href="#circle-text" startOffset="0">KOSMOS · MAISON DE BEAUTÉ · ESTABLISHED MMXX · </textPath>
+  </text>
+  <text x="60" y="68" text-anchor="middle" font-family="&#39;Bodoni Moda&#39;, &#39;Didot&#39;, serif" font-weight="300" font-style="italic" font-size="34" fill="currentColor">K</text>
+</svg>

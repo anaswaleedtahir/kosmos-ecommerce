@@ -1,0 +1,48 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+  .row-m { display:flex; gap: 32px; align-items: center; padding: 12px 0; }
+  .key { width: 220px; }
+  .v { font-family: var(--font-sans); font-size: 11px; color: var(--smoke); letter-spacing: 0.04em; }
+  .demo { flex:1; }
+  .ribbon { height: 6px; background: linear-gradient(to right, var(--ink), var(--ink)); width: 0; transition: width 1.8s cubic-bezier(0.2,0,0,1); }
+  .swatch-h { display: inline-flex; align-items: center; gap: 12px; }
+  .invert-demo { display:inline-flex; height: 44px; padding: 0 22px; align-items:center; background: var(--ink); color: var(--cream); font-family: var(--font-sans); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; border: 1px solid var(--ink); transition: background 200ms cubic-bezier(0.2,0,0,1), color 200ms cubic-bezier(0.2,0,0,1); }
+  .invert-demo:hover { background: transparent; color: var(--ink); }
+</style>
+<script>
+  window.addEventListener('load', () => {
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.ribbon').forEach(r => r.style.width = r.dataset.w);
+    });
+  });
+</script>
+</head>
+<body>
+<div class="card-stage">
+  <div class="row-m">
+    <div class="key"><div class="k-caps" style="font-size:11px">Duration</div></div>
+    <div class="demo" style="display:flex; flex-direction:column; gap:8px">
+      <div style="display:flex; align-items:center; gap:14px"><span class="v" style="width:90px">fast · 150ms</span><div class="ribbon" data-w="40px"></div></div>
+      <div style="display:flex; align-items:center; gap:14px"><span class="v" style="width:90px">default · 200ms</span><div class="ribbon" data-w="80px"></div></div>
+      <div style="display:flex; align-items:center; gap:14px"><span class="v" style="width:90px">slow · 400ms</span><div class="ribbon" data-w="180px"></div></div>
+      <div style="display:flex; align-items:center; gap:14px"><span class="v" style="width:90px">page · 700ms</span><div class="ribbon" data-w="280px"></div></div>
+    </div>
+  </div>
+  <div class="row-m" style="border-top:1px solid var(--line); padding-top: 18px">
+    <div class="key"><div class="k-caps" style="font-size:11px">Easing</div></div>
+    <div class="demo">
+      <div class="v">ease‑out emphasized · cubic-bezier(0.2, 0, 0, 1)</div>
+      <div class="v">sine · cubic-bezier(0.4, 0, 0.6, 1)</div>
+      <div class="v" style="color: var(--ink); margin-top:6px">No bounces. No springs. No rotation.</div>
+    </div>
+  </div>
+  <div class="row-m" style="border-top:1px solid var(--line); padding-top: 18px">
+    <div class="key"><div class="k-caps" style="font-size:11px">Hover · invert</div></div>
+    <div class="demo">
+      <div class="invert-demo">Add to bag</div>
+      <span class="v" style="margin-left: 14px">hover inverts fill ↔ border</span>
+    </div>
+  </div>
+</div>
+</body></html>

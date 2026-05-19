@@ -1,0 +1,40 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+  .demo { display:flex; gap: 14px; align-items: stretch; }
+  .col { background: var(--bone); flex: 1; height: 110px; display:flex; align-items:flex-end; justify-content:center; padding-bottom: 8px; }
+  .col .n { font-family: var(--font-sans); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--smoke); }
+  .scale { display: flex; flex-direction: column; gap: 6px; min-width: 220px; }
+  .scale .row { display:flex; justify-content: space-between; font-family: var(--font-sans); font-size: 12px; color: var(--ink); }
+  .scale .row .k { color: var(--smoke); }
+</style>
+</head>
+<body>
+<div class="card-stage">
+  <div style="display:flex; gap: 32px; align-items: center">
+    <div style="flex:1">
+      <div class="demo">
+        <div class="col"><div class="n">01</div></div>
+        <div class="col"><div class="n">02</div></div>
+        <div class="col"><div class="n">03</div></div>
+        <div class="col"><div class="n">04</div></div>
+        <div class="col"><div class="n">05</div></div>
+        <div class="col"><div class="n">06</div></div>
+        <div class="col"><div class="n">07</div></div>
+        <div class="col"><div class="n">08</div></div>
+        <div class="col"><div class="n">09</div></div>
+        <div class="col"><div class="n">10</div></div>
+        <div class="col"><div class="n">11</div></div>
+        <div class="col"><div class="n">12</div></div>
+      </div>
+    </div>
+    <div class="scale">
+      <div class="row"><span class="k">Max width</span><span>1440 px</span></div>
+      <div class="row"><span class="k">Gutter (web)</span><span>48 px</span></div>
+      <div class="row"><span class="k">Column gutter</span><span>24 px</span></div>
+      <div class="row"><span class="k">Prose max</span><span>560 px</span></div>
+      <div class="row"><span class="k">Gutter (mobile)</span><span>20 px</span></div>
+    </div>
+  </div>
+</div>
+</body></html>

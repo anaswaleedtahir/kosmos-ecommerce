@@ -1,0 +1,31 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+  .row-b { display:flex; gap: 18px; align-items: flex-end; margin-bottom: 14px; }
+  .col-b { display:flex; flex-direction: column; gap: 8px; }
+  .lbl { font-family: var(--font-sans); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--smoke); }
+</style>
+</head>
+<body>
+<div class="card-stage">
+  <div class="row-b">
+    <div class="col-b">
+      <span class="lbl">Primary · default</span>
+      <button class="k-btn">Add to bag</button>
+    </div>
+    <div class="col-b">
+      <span class="lbl">Primary · hover</span>
+      <button class="k-btn" style="background:transparent; color:var(--ink)">Add to bag</button>
+    </div>
+    <div class="col-b">
+      <span class="lbl">Secondary</span>
+      <button class="k-btn k-btn--secondary">Discover</button>
+    </div>
+    <div class="col-b">
+      <span class="lbl">Link</span>
+      <a class="k-link" href="#">Read the journal</a>
+    </div>
+  </div>
+  <div class="lbl" style="margin-top: 4px">Full‑height rectangles. 48px web · 52px mobile. Tracked caps. Hover inverts fill ↔ border.</div>
+</div>
+</body></html>

@@ -1,0 +1,25 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 9px 0; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  td.dot { width: 28px; }
+  td.tok { font-family: var(--font-sans); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; width: 200px; }
+  td.use { font-family: var(--font-sans); font-size: 13px; color: var(--smoke); }
+  .chip { width: 18px; height: 18px; border: 1px solid var(--line); display: inline-block; }
+</style>
+</head>
+<body>
+<div class="card-stage">
+  <table>
+    <tr><td class="dot"><span class="chip" style="background:var(--ink)"></span></td><td class="tok">— bg-dark / fg</td><td class="use">Dark backdrops, primary buttons, primary type, footers</td></tr>
+    <tr><td class="dot"><span class="chip" style="background:var(--graphite)"></span></td><td class="tok">— bg-dark-alt</td><td class="use">Cards on ink, secondary dark surfaces</td></tr>
+    <tr><td class="dot"><span class="chip" style="background:var(--paper)"></span></td><td class="tok">— bg / fg-inverse</td><td class="use">Page background, type on ink</td></tr>
+    <tr><td class="dot"><span class="chip" style="background:var(--snow)"></span></td><td class="tok">— bg-elev</td><td class="use">Modal sheets and drawers</td></tr>
+    <tr><td class="dot"><span class="chip" style="background:var(--bone)"></span></td><td class="tok">— bg-alt</td><td class="use">Off‑hero sections, product tiles</td></tr>
+    <tr><td class="dot"><span class="chip" style="background:var(--stone)"></span></td><td class="tok">— quiet neutral</td><td class="use">Editorial dividers, secondary surfaces, dead air</td></tr>
+    <tr><td class="dot"><span class="chip" style="background:var(--smoke)"></span></td><td class="tok">— fg-muted</td><td class="use">Secondary type, captions</td></tr>
+    <tr><td class="dot"><span class="chip" style="background:var(--line)"></span></td><td class="tok">— border</td><td class="use">Hairlines, input borders, dividers</td></tr>
+  </table>
+</div>
+</body></html>
