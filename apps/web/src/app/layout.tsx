@@ -1,7 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { preconnect } from "react-dom";
-import { Nav } from "@kosmos/design/nav";
-import { Footer } from "@kosmos/design/footer";
+import { BagProvider } from "@/components/providers/BagProvider";
+import { UIProvider } from "@/components/providers/UIProvider";
+import { AppHeader, AppFooter } from "@/components/AppShell";
+import { BagDrawer } from "@/components/BagDrawer";
+import { SearchOverlay } from "@/components/SearchOverlay";
+import { Toast } from "@/components/Toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -28,9 +32,18 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <Nav />
-        <main id="main-content" className="flex-1">{children}</main>
-        <Footer />
+        <BagProvider>
+          <UIProvider>
+            <AppHeader />
+            <main id="main-content" className="flex-1">
+              {children}
+            </main>
+            <AppFooter />
+            <BagDrawer />
+            <SearchOverlay />
+            <Toast />
+          </UIProvider>
+        </BagProvider>
       </body>
     </html>
   );

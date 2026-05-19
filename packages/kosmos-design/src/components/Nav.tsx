@@ -1,29 +1,49 @@
 'use client';
 
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 interface NavProps {
-  variant?: 'cream' | 'dark';
-  onLogo?: () => void;
-  onCategory?: (category: string) => void;
+  bagCount?: number;
+  onSearch?: () => void;
+  onBag?: () => void;
+  onAccount?: () => void;
 }
 
-const CATEGORIES = ['Fragrance', 'Skin', 'Lipstick', 'The Maison'] as const;
-const ACTIONS = ['Search', 'Account', 'Bag'] as const;
+const CATEGORIES = [
+  { id: 'fragrance', label: 'Fragrance', href: '/collection/fragrance' },
+  { id: 'skin', label: 'Skin', href: '/collection/skin' },
+  { id: 'lipstick', label: 'Lipstick', href: '/collection/lipstick' },
+  { id: 'journal', label: 'The Journal', href: '/journal' },
+] as const;
 
-export function Nav({ variant = 'cream', onLogo, onCategory }: NavProps) {
+export function Nav({ bagCount = 0, onSearch, onBag, onAccount }: NavProps) {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
     window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const overHero = variant === 'dark' && !scrolled;
+  const isHome = pathname === '/';
+  const overHero = isHome && !scrolled;
   const fg = overHero ? 'var(--color-cream)' : 'var(--color-ink)';
   const bg = overHero ? 'transparent' : 'rgba(232, 228, 216, 0.92)';
   const borderColor = overHero ? 'transparent' : 'var(--color-line)';
+
+  const isActive = (href: string) => {
+    if (href === '/journal') {
+      return pathname === '/journal' || pathname.startsWith('/journal/');
+    }
+    if (href.startsWith('/collection/')) {
+      return pathname === href || pathname.startsWith(`${href}/`);
+    }
+    return pathname === href;
+  };
 
   return (
     <nav
@@ -53,39 +73,54 @@ export function Nav({ variant = 'cream', onLogo, onCategory }: NavProps) {
         }}
       >
         <div className="flex gap-9">
-          {CATEGORIES.map((c) => (
-            <a
-              key={c}
-              href="#"
-              onClick={(e) => {
-                if (onCategory) e.preventDefault();
-                onCategory?.(c);
-              }}
-              className="font-sans text-[12px] uppercase tracking-[0.18em] text-inherit"
-            >
-              {c}
-            </a>
-          ))}
+          {CATEGORIES.map((c) => {
+            const active = isActive(c.href);
+            return (
+              <Link
+                key={c.id}
+                href={c.href}
+                className="font-sans text-[12px] uppercase tracking-[0.18em] text-inherit"
+                style={
+                  active
+                    ? { borderBottom: '1px solid currentColor', paddingBottom: 2 }
+                    : undefined
+                }
+              >
+                {c.label}
+              </Link>
+            );
+          })}
         </div>
 
-        <a
+        <Link
           href="/"
-          onClick={onLogo ? (e) => { e.preventDefault(); onLogo(); } : undefined}
-          className="font-display font-light text-[28px] text-inherit tracking-[0.34em] pl-[0.34em]"
+          className="font-display font-light text-[28px] text-inherit tracking-[0.34em] pl-[0.34em] justify-self-center"
         >
           KOSMOS
-        </a>
+        </Link>
 
-        <div className="flex justify-end gap-6">
-          {ACTIONS.map((c) => (
-            <button
-              key={c}
-              type="button"
-              className="font-sans text-[12px] uppercase tracking-[0.18em] text-inherit bg-transparent border-0 cursor-pointer p-0 hover:opacity-60"
-            >
-              {c}
-            </button>
-          ))}
+        <div className="flex justify-end gap-6 items-center">
+          <button
+            type="button"
+            onClick={onSearch}
+            className="font-sans text-[12px] uppercase tracking-[0.18em] text-inherit bg-transparent border-0 cursor-pointer p-0 hover:opacity-60"
+          >
+            Search
+          </button>
+          <button
+            type="button"
+            onClick={onAccount}
+            className="font-sans text-[12px] uppercase tracking-[0.18em] text-inherit bg-transparent border-0 cursor-pointer p-0 hover:opacity-60"
+          >
+            Account
+          </button>
+          <button
+            type="button"
+            onClick={onBag}
+            className="font-sans text-[12px] uppercase tracking-[0.18em] text-inherit bg-transparent border-0 cursor-pointer p-0 hover:opacity-60"
+          >
+            Bag ({String(bagCount).padStart(2, '0')})
+          </button>
         </div>
       </div>
     </nav>

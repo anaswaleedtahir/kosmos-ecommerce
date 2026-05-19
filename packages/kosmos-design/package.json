@@ -10,14 +10,19 @@
     "./editorial": "./src/components/Editorial.tsx",
     "./btn": "./src/components/Btn.tsx",
     "./size-pill": "./src/components/SizePill.tsx",
-    "./caps-link": "./src/components/CapsLink.tsx"
+    "./shade-pill": "./src/components/ShadePill.tsx",
+    "./caps-link": "./src/components/CapsLink.tsx",
+    "./field": "./src/components/Field.tsx",
+    "./icons": "./src/components/Icons.tsx"
   },
   "peerDependencies": {
+    "next": ">=15",
     "react": ">=18",
     "react-dom": ">=18"
   },
   "devDependencies": {
     "@types/react": "^19",
+    "next": "16.2.6",
     "react": "^19",
     "react-dom": "^19"
   }
