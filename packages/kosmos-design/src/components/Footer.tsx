@@ -6,7 +6,7 @@ const LINKS = [
 
 export function Footer() {
   return (
-    <footer className="bg-ink text-snow">
+    <footer className="bg-ink" style={{ color: 'var(--color-snow)' }}>
       <div
         style={{
           maxWidth: 1440,
@@ -40,7 +40,8 @@ export function Footer() {
               <a
                 key={item}
                 href="#"
-                className="block font-sans text-[14px] text-snow mb-3"
+                className="block font-sans text-[14px] mb-3"
+                style={{ color: 'var(--color-snow)' }}
               >
                 {item}
               </a>
