@@ -72,7 +72,7 @@ export function Nav({ bagCount = 0, onSearch, onBag, onAccount }: NavProps) {
           alignItems: 'center',
         }}
       >
-        <div className="flex gap-9">
+        <div style={{ display: 'flex', gap: '2.25rem' }}>
           {CATEGORIES.map((c) => {
             const active = isActive(c.href);
             return (

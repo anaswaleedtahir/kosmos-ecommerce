@@ -124,8 +124,8 @@ export default function HomePage() {
 
           <div style={{ textAlign: "right", maxWidth: 340 }}>
             <p
-              style={{ fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}
-              className="font-sans text-white/78"
+              style={{ fontSize: 14, lineHeight: 1.7, marginBottom: 20, color: "var(--color-cream)" }}
+              className="font-sans"
             >
               A scent of cold air and white smoke. Amber lingers at the wrist;
               the rest disappears.
@@ -148,13 +148,14 @@ export default function HomePage() {
             Three disciplines · One house
           </div>
           <h2
-            className="font-display font-light text-paper"
+            className="font-display font-light"
             style={{
               fontSize: 88,
               lineHeight: 1,
               letterSpacing: "-0.02em",
               margin: "0 auto",
               maxWidth: 900,
+              color: "var(--color-cream)",
             }}
           >
             Fragrance, skin,
@@ -201,11 +202,12 @@ export default function HomePage() {
               </div>
               <div className="absolute bottom-10 left-8 right-8">
                 <h3
-                  className="font-display font-light text-paper m-0"
+                  className="font-display font-light m-0"
                   style={{
                     fontSize: 56,
                     lineHeight: 1,
                     letterSpacing: "-0.01em",
+                    color: "var(--color-cream)",
                   }}
                 >
                   {c.title}
@@ -282,8 +284,8 @@ export default function HomePage() {
         <div style={{ maxWidth: 1440, margin: "0 auto" }}>
           <div className="flex justify-between items-end mb-14">
             <h2
-              className="font-display font-light text-paper m-0"
-              style={{ fontSize: 56, lineHeight: 1, letterSpacing: "-0.02em" }}
+              className="font-display font-light m-0"
+              style={{ fontSize: 56, lineHeight: 1, letterSpacing: "-0.02em", color: "var(--color-cream)" }}
             >
               The arrivals,
               <br />

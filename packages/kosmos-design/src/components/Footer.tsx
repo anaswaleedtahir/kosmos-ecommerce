@@ -33,7 +33,7 @@ export function Footer() {
 
         {LINKS.map((col) => (
           <div key={col.h}>
-            <p className="font-sans text-[11px] tracking-[0.18em] uppercase text-white/50 m-0 mb-[18px] font-medium max-w-none">
+            <p className="font-sans text-[11px] tracking-[0.18em] uppercase m-0 mb-[18px] font-medium max-w-none" style={{ color: "var(--color-cream)" }}>
               {col.h}
             </p>
             {col.items.map((item) => (
