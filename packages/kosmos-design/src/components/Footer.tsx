@@ -33,9 +33,9 @@ export function Footer() {
 
         {LINKS.map((col) => (
           <div key={col.h}>
-            <h6 className="font-sans text-[11px] tracking-[0.18em] uppercase text-white/50 m-0 mb-[18px] font-medium">
+            <p className="font-sans text-[11px] tracking-[0.18em] uppercase text-white/50 m-0 mb-[18px] font-medium max-w-none">
               {col.h}
-            </h6>
+            </p>
             {col.items.map((item) => (
               <a
                 key={item}

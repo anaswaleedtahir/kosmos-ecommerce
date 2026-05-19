@@ -22,7 +22,7 @@ export function Btn({ children, variant = 'primary', block, className, ...rest }
       className={[
         'inline-flex items-center justify-center h-12 px-7 border',
         'font-sans text-[13px] font-medium uppercase tracking-[0.18em]',
-        'cursor-pointer whitespace-nowrap transition-[background,color,border-color] duration-200',
+        'cursor-pointer whitespace-nowrap transition-[background,color,border-color] duration-200 motion-reduce:transition-none',
         VARIANTS[variant],
         block ? 'w-full' : '',
         className ?? '',

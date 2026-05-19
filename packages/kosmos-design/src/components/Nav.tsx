@@ -27,6 +27,7 @@ export function Nav({ variant = 'cream', onLogo, onCategory }: NavProps) {
 
   return (
     <nav
+      className="kosmos-nav-motion"
       style={{
         position: 'fixed',
         top: 0,
@@ -38,8 +39,6 @@ export function Nav({ variant = 'cream', onLogo, onCategory }: NavProps) {
         WebkitBackdropFilter: overHero ? 'none' : 'blur(12px)',
         borderBottom: `1px solid ${borderColor}`,
         color: fg,
-        transition:
-          'background 300ms cubic-bezier(0.2,0,0,1), color 300ms cubic-bezier(0.2,0,0,1), border-color 300ms cubic-bezier(0.2,0,0,1)',
       }}
     >
       <div
@@ -59,7 +58,7 @@ export function Nav({ variant = 'cream', onLogo, onCategory }: NavProps) {
               key={c}
               href="#"
               onClick={(e) => {
-                e.preventDefault();
+                if (onCategory) e.preventDefault();
                 onCategory?.(c);
               }}
               className="font-sans text-[12px] uppercase tracking-[0.18em] text-inherit"
@@ -71,10 +70,7 @@ export function Nav({ variant = 'cream', onLogo, onCategory }: NavProps) {
 
         <a
           href="/"
-          onClick={(e) => {
-            e.preventDefault();
-            onLogo?.();
-          }}
+          onClick={onLogo ? (e) => { e.preventDefault(); onLogo(); } : undefined}
           className="font-display font-light text-[28px] text-inherit tracking-[0.34em] pl-[0.34em]"
         >
           KOSMOS
@@ -82,13 +78,13 @@ export function Nav({ variant = 'cream', onLogo, onCategory }: NavProps) {
 
         <div className="flex justify-end gap-6">
           {ACTIONS.map((c) => (
-            <a
+            <button
               key={c}
-              href="#"
-              className="font-sans text-[12px] uppercase tracking-[0.18em] text-inherit"
+              type="button"
+              className="font-sans text-[12px] uppercase tracking-[0.18em] text-inherit bg-transparent border-0 cursor-pointer p-0 hover:opacity-60"
             >
               {c}
-            </a>
+            </button>
           ))}
         </div>
       </div>

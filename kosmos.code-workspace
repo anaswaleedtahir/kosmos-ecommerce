@@ -5,7 +5,8 @@
     { "name": "catalog-service", "path": "services/catalog-service" },
     { "name": "order-service", "path": "services/order-service" },
     { "name": "notification-service", "path": "services/notification-service" },
-    { "name": "shared", "path": "packages/shared" }
+    { "name": "packages", "path": "packages/" },
+    { "name": "web", "path": "apps/web" }
   ],
   "settings": {
     "python.defaultInterpreterPath": "${workspaceFolder:root}/.venv/bin/python",

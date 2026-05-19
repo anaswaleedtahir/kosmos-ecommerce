@@ -1,9 +1,13 @@
+import { preload } from "react-dom";
 import Link from "next/link";
-import { Editorial } from "@kosmos/design";
+import { Editorial } from "@kosmos/design/editorial";
 
 const PRODUCT_HREF = "/products/noir-undone";
+const HERO_IMAGE =
+  "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=2200&q=80";
 
 export default function HomePage() {
+  preload(HERO_IMAGE, { as: "image" });
   return (
     <div>
       {/* Hero — full-bleed, dark, oversized wordmark */}
@@ -13,8 +17,7 @@ export default function HomePage() {
           height: "100vh",
           minHeight: 760,
           backgroundColor: "var(--color-ink)",
-          backgroundImage:
-            "radial-gradient(ellipse at 65% 55%, rgba(120, 70, 30, 0.55) 0%, rgba(10, 10, 10, 0) 55%), linear-gradient(rgba(10,10,10,0.65), rgba(10,10,10,0.92)), url('https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=2200&q=80')",
+          backgroundImage: `radial-gradient(ellipse at 65% 55%, rgba(120, 70, 30, 0.55) 0%, rgba(10, 10, 10, 0) 55%), linear-gradient(rgba(10,10,10,0.65), rgba(10,10,10,0.92)), url('${HERO_IMAGE}')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           overflow: "hidden",
@@ -48,8 +51,9 @@ export default function HomePage() {
             paddingLeft: "0.18em",
             lineHeight: 1,
             whiteSpace: "nowrap",
+            color: "white",
           }}
-          className="font-display font-light text-paper"
+          className="font-display font-light"
         >
           KOSMOS
         </h1>
@@ -92,9 +96,9 @@ export default function HomePage() {
             </p>
             <Link
               href={PRODUCT_HREF}
-              className="inline-flex items-center justify-center h-12 px-7 border font-sans text-[13px] font-medium uppercase tracking-[0.18em] bg-transparent text-paper border-white/40 hover:bg-paper hover:text-ink hover:border-paper transition-[background,color,border-color] duration-200"
+              className="inline-flex items-center justify-center h-12 px-7 border font-sans text-[13px] font-medium uppercase tracking-[0.18em] bg-transparent text-paper border-white/40 hover:bg-paper hover:text-ink hover:border-paper transition-[background,color,border-color] duration-200 motion-reduce:transition-none"
             >
-              Discover the fragrance
+              Discover the Fragrance
             </Link>
           </div>
         </div>

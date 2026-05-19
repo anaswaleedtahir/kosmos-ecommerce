@@ -4,7 +4,13 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
-    "./tokens.css": "./src/tokens.css"
+    "./tokens.css": "./src/tokens.css",
+    "./nav": "./src/components/Nav.tsx",
+    "./footer": "./src/components/Footer.tsx",
+    "./editorial": "./src/components/Editorial.tsx",
+    "./btn": "./src/components/Btn.tsx",
+    "./size-pill": "./src/components/SizePill.tsx",
+    "./caps-link": "./src/components/CapsLink.tsx"
   },
   "peerDependencies": {
     "react": ">=18",
