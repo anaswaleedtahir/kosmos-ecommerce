@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     const loginUpstream = await fetch(`${IAM}/api/v1/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: body.username, password: body.password }),
+      body: JSON.stringify({ email: body.email, password: body.password }),
     });
 
     const res = NextResponse.json({ ok: true }, { status: 201 });
