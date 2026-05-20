@@ -1,8 +1,5 @@
-from app.catalog.application.dto import (
-    CreateVariantInput,
-    ProductVariantResult,
-    variant_to_result,
-)
+from app.catalog.application.dto import CreateVariantInput
+from app.catalog.domain.entities.product import ProductVariant
 from app.catalog.domain.exceptions import ProductNotFoundError, SkuAlreadyExistsError
 from app.catalog.domain.ports.unit_of_work import CatalogUnitOfWorkFactory
 
@@ -11,7 +8,7 @@ class CreateVariantUseCase:
     def __init__(self, uow_factory: CatalogUnitOfWorkFactory) -> None:
         self._uow_factory = uow_factory
 
-    async def execute(self, input: CreateVariantInput) -> ProductVariantResult:
+    async def execute(self, input: CreateVariantInput) -> ProductVariant:
         async with self._uow_factory() as uow:
             if not await uow.products.find_by_id(input.product_id):
                 raise ProductNotFoundError()
@@ -27,4 +24,4 @@ class CreateVariantUseCase:
             )
             await uow.commit()
 
-        return variant_to_result(variant)
+        return variant

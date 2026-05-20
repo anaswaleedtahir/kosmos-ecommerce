@@ -66,7 +66,7 @@ async def list_products(
     use_case: ListProductsUseCase = Depends(get_list_products_use_case),
 ) -> list[ProductResponse]:
     results = await use_case.execute(limit=limit, offset=offset)
-    return [ProductResponse(**r.__dict__) for r in results]
+    return [ProductResponse.model_validate(r) for r in results]
 
 
 @router.get("/products/by-slug/{slug}", response_model=ProductResponse)
@@ -75,7 +75,7 @@ async def get_product_by_slug(
     use_case: GetProductBySlugUseCase = Depends(get_get_product_by_slug_use_case),
 ) -> ProductResponse:
     result = await use_case.execute(slug)
-    return ProductResponse(**result.__dict__)
+    return ProductResponse.model_validate(result)
 
 
 @router.get("/products/{product_id}", response_model=ProductResponse)
@@ -84,7 +84,7 @@ async def get_product(
     use_case: GetProductUseCase = Depends(get_get_product_use_case),
 ) -> ProductResponse:
     result = await use_case.execute(product_id)
-    return ProductResponse(**result.__dict__)
+    return ProductResponse.model_validate(result)
 
 
 # ── Products (writes require catalog:write) ─────────────────────────────────
@@ -108,7 +108,7 @@ async def create_product(
             storefront_metadata=data.storefront_metadata,
         )
     )
-    return ProductResponse(**result.__dict__)
+    return ProductResponse.model_validate(result)
 
 
 @router.patch("/products/{product_id}", response_model=ProductResponse)
@@ -128,7 +128,7 @@ async def update_product(
             storefront_metadata=data.storefront_metadata,
         )
     )
-    return ProductResponse(**result.__dict__)
+    return ProductResponse.model_validate(result)
 
 
 @router.patch("/products/{product_id}/status", response_model=ProductResponse)
@@ -145,7 +145,7 @@ async def set_product_status(
             actor_id=_actor_id(payload),
         )
     )
-    return ProductResponse(**result.__dict__)
+    return ProductResponse.model_validate(result)
 
 
 # ── Variants ─────────────────────────────────────────────────────────────────
@@ -171,7 +171,7 @@ async def create_variant(
             actor_id=_actor_id(payload),
         )
     )
-    return ProductVariantResponse(**result.__dict__)
+    return ProductVariantResponse.model_validate(result)
 
 
 @router.patch("/variants/{variant_id}", response_model=ProductVariantResponse)
@@ -190,7 +190,7 @@ async def update_variant(
             actor_id=_actor_id(payload),
         )
     )
-    return ProductVariantResponse(**result.__dict__)
+    return ProductVariantResponse.model_validate(result)
 
 
 @router.delete("/variants/{variant_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -210,7 +210,7 @@ async def list_categories(
     use_case: ListCategoriesUseCase = Depends(get_list_categories_use_case),
 ) -> list[CategoryResponse]:
     results = await use_case.execute()
-    return [CategoryResponse(**r.__dict__) for r in results]
+    return [CategoryResponse.model_validate(r) for r in results]
 
 
 @router.post(
@@ -229,4 +229,4 @@ async def create_category(
             actor_id=_actor_id(payload),
         )
     )
-    return CategoryResponse(**result.__dict__)
+    return CategoryResponse.model_validate(result)

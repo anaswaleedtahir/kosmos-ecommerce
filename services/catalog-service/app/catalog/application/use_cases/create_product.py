@@ -1,8 +1,5 @@
-from app.catalog.application.dto import (
-    CreateProductInput,
-    ProductResult,
-    product_to_result,
-)
+from app.catalog.application.dto import CreateProductInput
+from app.catalog.domain.entities.product import Product
 from app.catalog.domain.exceptions import (
     CategoryNotFoundError,
     ProductSlugAlreadyExistsError,
@@ -14,7 +11,7 @@ class CreateProductUseCase:
     def __init__(self, uow_factory: CatalogUnitOfWorkFactory) -> None:
         self._uow_factory = uow_factory
 
-    async def execute(self, input: CreateProductInput) -> ProductResult:
+    async def execute(self, input: CreateProductInput) -> Product:
         async with self._uow_factory() as uow:
             if not await uow.categories.find_by_id(input.category_id):
                 raise CategoryNotFoundError()
@@ -32,4 +29,4 @@ class CreateProductUseCase:
             )
             await uow.commit()
 
-        return product_to_result(product)
+        return product

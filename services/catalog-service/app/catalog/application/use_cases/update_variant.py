@@ -1,8 +1,5 @@
-from app.catalog.application.dto import (
-    ProductVariantResult,
-    UpdateVariantInput,
-    variant_to_result,
-)
+from app.catalog.application.dto import UpdateVariantInput
+from app.catalog.domain.entities.product import ProductVariant
 from app.catalog.domain.exceptions import (
     ProductNotFoundError,
     ProductVariantNotFoundError,
@@ -14,7 +11,7 @@ class UpdateVariantUseCase:
     def __init__(self, uow_factory: CatalogUnitOfWorkFactory) -> None:
         self._uow_factory = uow_factory
 
-    async def execute(self, input: UpdateVariantInput) -> ProductVariantResult:
+    async def execute(self, input: UpdateVariantInput) -> ProductVariant:
         async with self._uow_factory() as uow:
             variant = await uow.products.find_variant_by_id(input.variant_id)
             if not variant:
@@ -39,4 +36,4 @@ class UpdateVariantUseCase:
             await uow.products.save_variant(variant)
             await uow.commit()
 
-        return variant_to_result(variant)
+        return variant

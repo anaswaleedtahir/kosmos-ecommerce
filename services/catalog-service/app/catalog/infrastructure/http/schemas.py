@@ -1,12 +1,14 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.catalog.domain.entities.product import ProductStatus
 
 
 class ProductVariantResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: uuid.UUID
     sku: str
     price: float
@@ -15,6 +17,8 @@ class ProductVariantResponse(BaseModel):
 
 
 class ProductResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: uuid.UUID
     name: str
     description: str | None
@@ -66,6 +70,8 @@ class CategoryCreate(BaseModel):
 
 
 class CategoryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: uuid.UUID
     name: str
     slug: str

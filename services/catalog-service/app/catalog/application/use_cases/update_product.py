@@ -1,8 +1,5 @@
-from app.catalog.application.dto import (
-    ProductResult,
-    UpdateProductInput,
-    product_to_result,
-)
+from app.catalog.application.dto import UpdateProductInput
+from app.catalog.domain.entities.product import Product
 from app.catalog.domain.exceptions import CategoryNotFoundError, ProductNotFoundError
 from app.catalog.domain.ports.unit_of_work import CatalogUnitOfWorkFactory
 
@@ -11,7 +8,7 @@ class UpdateProductUseCase:
     def __init__(self, uow_factory: CatalogUnitOfWorkFactory) -> None:
         self._uow_factory = uow_factory
 
-    async def execute(self, input: UpdateProductInput) -> ProductResult:
+    async def execute(self, input: UpdateProductInput) -> Product:
         async with self._uow_factory() as uow:
             product = await uow.products.find_by_id(input.product_id)
             if not product:
@@ -32,4 +29,4 @@ class UpdateProductUseCase:
             await uow.products.save(product)
             await uow.commit()
 
-        return product_to_result(product)
+        return product

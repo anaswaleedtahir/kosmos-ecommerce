@@ -1,4 +1,5 @@
-from app.catalog.application.dto import CategoryResult, CreateCategoryInput
+from app.catalog.application.dto import CreateCategoryInput
+from app.catalog.domain.entities.category import Category
 from app.catalog.domain.exceptions import (
     CategoryNotFoundError,
     CategorySlugAlreadyExistsError,
@@ -10,7 +11,7 @@ class CreateCategoryUseCase:
     def __init__(self, uow_factory: CatalogUnitOfWorkFactory) -> None:
         self._uow_factory = uow_factory
 
-    async def execute(self, input: CreateCategoryInput) -> CategoryResult:
+    async def execute(self, input: CreateCategoryInput) -> Category:
         async with self._uow_factory() as uow:
             if await uow.categories.find_by_slug(input.slug):
                 raise CategorySlugAlreadyExistsError()
@@ -25,10 +26,4 @@ class CreateCategoryUseCase:
             )
             await uow.commit()
 
-        return CategoryResult(
-            id=category.id,
-            name=category.name,
-            slug=category.slug,
-            parent_id=category.parent_id,
-            created_at=category.created_at,
-        )
+        return category
