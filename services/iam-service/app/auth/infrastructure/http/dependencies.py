@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.auth.domain.exceptions import InvalidTokenError, TokenExpiredError
+from app.auth.domain.exceptions import TokenRevokedError
 from app.auth.domain.ports.token_verifier import TokenPayload
 from app.auth.infrastructure.composition import get_revocation_store, get_token_verifier
 from app.auth.infrastructure.stores.redis_revocation_store import RedisRevocationStore
@@ -15,22 +15,10 @@ async def get_current_user(
     verifier: JwtTokenVerifier = Depends(get_token_verifier),
     revocation_store: RedisRevocationStore = Depends(get_revocation_store),
 ) -> TokenPayload:
-    token = credentials.credentials
-    try:
-        payload = verifier.verify(token)
-    except (TokenExpiredError, InvalidTokenError) as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e),
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    payload = verifier.verify(credentials.credentials)
 
     if await revocation_store.is_revoked(str(payload["jti"])):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has been revoked",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise TokenRevokedError()
 
     return payload
 

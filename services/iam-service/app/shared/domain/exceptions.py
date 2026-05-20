@@ -1,9 +1,6 @@
-class DomainError(Exception):
-    """Base class for all domain errors."""
+from shared.exceptions import AuthorizationError
 
 
-class SystemRoleProtectedError(DomainError):
-    """Raised when attempting to delete or mutate a protected (system) role."""
-
+class SystemRoleProtectedError(AuthorizationError):
     def __init__(self) -> None:
         super().__init__("Cannot delete system role")

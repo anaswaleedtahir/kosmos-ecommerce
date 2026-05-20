@@ -9,7 +9,7 @@ import pytest
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 
-from app.auth.domain.exceptions import InvalidTokenError
+from app.auth.domain.exceptions import InvalidTokenError, TokenRevokedError
 from app.auth.domain.ports.token_verifier import TokenPayload
 from app.auth.infrastructure.http.dependencies import (
     get_current_user,
@@ -47,7 +47,7 @@ async def test_get_current_user_valid_token():
 
 
 async def test_get_current_user_invalid_token():
-    """Test get_current_user with an invalid token raises HTTPException."""
+    """Invalid token propagates as InvalidTokenError; global handler maps it to 401."""
     verifier = FakeTokenVerifier(raises=InvalidTokenError)
     revocation_store = FakeRevocationStore()
 
@@ -55,11 +55,11 @@ async def test_get_current_user_invalid_token():
         scheme="Bearer", credentials="bad.jwt.token"
     )
 
-    with pytest.raises(HTTPException) as exc_info:
+    with pytest.raises(InvalidTokenError) as exc_info:
         await get_current_user(credentials, verifier, revocation_store)
 
     assert exc_info.value.status_code == 401
-    assert exc_info.value.headers["WWW-Authenticate"] == "Bearer"
+    assert exc_info.value.headers == {"WWW-Authenticate": "Bearer"}
 
 
 async def test_get_current_user_revoked_token():
@@ -83,12 +83,12 @@ async def test_get_current_user_revoked_token():
         scheme="Bearer", credentials="revoked.jwt.token"
     )
 
-    with pytest.raises(HTTPException) as exc_info:
+    with pytest.raises(TokenRevokedError) as exc_info:
         await get_current_user(credentials, verifier, revocation_store)
 
     assert exc_info.value.status_code == 401
-    assert "Token has been revoked" in exc_info.value.detail
-    assert exc_info.value.headers["WWW-Authenticate"] == "Bearer"
+    assert "Token has been revoked" in str(exc_info.value)
+    assert exc_info.value.headers == {"WWW-Authenticate": "Bearer"}
 
 
 # ──────────────────────────────────────────────────────────────

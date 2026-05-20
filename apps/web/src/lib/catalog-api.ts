@@ -1,76 +1,30 @@
 import "server-only";
 
-import type { Category, Product, Variant } from "./types";
+import { parseStorefrontProduct } from "./schemas/catalog";
+import type { Product } from "./types";
 
 const BASE = process.env.CATALOG_SERVICE_URL ?? "http://localhost:8001";
 const API = `${BASE}/api/v1`;
-
-// ── Backend response shapes ───────────────────────────────────────────────────
-
-interface BackendVariant {
-  id: string;
-  sku: string;
-  price: number;
-  attributes: Record<string, unknown>;
-  is_active: boolean;
-}
-
-interface BackendProduct {
-  id: string;
-  slug: string;
-  name: string;
-  description: string | null;
-  category_id: string;
-  status: string;
-  storefront_metadata: Record<string, unknown>;
-  variants: BackendVariant[];
-}
 
 interface InventoryItem {
   variant_id: string;
   available: number;
 }
 
-// ── Mapping ───────────────────────────────────────────────────────────────────
-
-function toVariant(v: BackendVariant, stockMap: Map<string, number>): Variant {
-  const attrs = v.attributes as Record<string, unknown>;
-  return {
-    id: v.id,
-    label: (attrs.label as string | undefined) ?? v.sku,
-    price: v.price,
-    stock: stockMap.get(v.id) ?? 0,
-    swatch: (attrs.swatch as string | undefined) ?? undefined,
-    default: (attrs.is_default as boolean | undefined) ?? false,
-  };
+interface RawBackendProductLike {
+  variants?: Array<{ id?: unknown }>;
 }
 
-function toProduct(bp: BackendProduct, stockMap: Map<string, number>): Product {
-  const m = bp.storefront_metadata as Record<string, unknown>;
-  return {
-    id: bp.slug,
-    uuid: bp.id,
-    cat: ((m.cat as string) ?? "fragrance") as Category,
-    no: (m.no as string) ?? "",
-    name: bp.name,
-    italic: (m.italic as string | undefined) ?? undefined,
-    tagline: (m.tagline as string) ?? "",
-    description: bp.description ?? "",
-    image: (m.image_url as string) ?? "",
-    image2: (m.image_url_2 as string | undefined) ?? undefined,
-    image3: (m.image_url_3 as string | undefined) ?? undefined,
-    family: (m.family as string) ?? "",
-    composer: (m.composer as string | undefined) ?? undefined,
-    variantLabel: (m.variant_label as string) ?? "Variant",
-    variantsAreShades: (m.variants_are_shades as boolean) ?? false,
-    notes: (m.notes as Record<string, string>) ?? {},
-    variants: bp.variants
-      .filter((v) => v.is_active)
-      .map((v) => toVariant(v, stockMap)),
-  };
+function collectVariantIds(raw: unknown[]): string[] {
+  const ids: string[] = [];
+  for (const p of raw) {
+    const variants = (p as RawBackendProductLike).variants ?? [];
+    for (const v of variants) {
+      if (typeof v.id === "string") ids.push(v.id);
+    }
+  }
+  return ids;
 }
-
-// ── Inventory batch fetch ─────────────────────────────────────────────────────
 
 async function fetchStockMap(variantIds: string[]): Promise<Map<string, number>> {
   if (!variantIds.length) return new Map();
@@ -87,20 +41,19 @@ async function fetchStockMap(variantIds: string[]): Promise<Map<string, number>>
   }
 }
 
-// ── Public API (server-only) ──────────────────────────────────────────────────
-
 export async function getProducts(): Promise<Product[]> {
   try {
     const res = await fetch(`${API}/catalog/products?limit=100`, {
       next: { revalidate: 60 },
     });
     if (!res.ok) return [];
-    const products = (await res.json()) as BackendProduct[];
+    const raw = (await res.json()) as unknown[];
 
-    const allVariantIds = products.flatMap((p) => p.variants.map((v) => v.id));
-    const stockMap = await fetchStockMap(allVariantIds);
+    const stockMap = await fetchStockMap(collectVariantIds(raw));
 
-    return products.map((p) => toProduct(p, stockMap));
+    return raw
+      .map((row) => parseStorefrontProduct(row, stockMap))
+      .filter((p): p is Product => p !== null);
   } catch {
     return [];
   }
@@ -112,12 +65,12 @@ export async function getProduct(slug: string): Promise<Product | null> {
       next: { revalidate: 60 },
     });
     if (!res.ok) return null;
-    const bp = (await res.json()) as BackendProduct;
+    const raw = (await res.json()) as unknown;
 
-    const variantIds = bp.variants.map((v) => v.id);
+    const variantIds = collectVariantIds([raw]);
     const stockMap = await fetchStockMap(variantIds);
 
-    return toProduct(bp, stockMap);
+    return parseStorefrontProduct(raw, stockMap);
   } catch {
     return null;
   }

@@ -21,6 +21,7 @@ from contextlib import asynccontextmanager
 from typing import Awaitable, cast
 
 from fastapi import APIRouter, FastAPI
+from shared.exceptions import register_domain_exception_handler
 from shared.logging import setup_dev_logging, setup_logging
 from shared.middleware import RequestResponseMiddleware
 
@@ -31,14 +32,8 @@ from app.audit.infrastructure.http import routes as audit_routes
 from app.auth.infrastructure.crypto.key_pair import key_pair
 from app.auth.infrastructure.http import jwks
 from app.auth.infrastructure.http import routes as auth_routes
-from app.auth.infrastructure.http.exception_mapper import (
-    register_auth_exception_handlers,
-)
 from app.config import settings
 from app.rbac.infrastructure.http import routes as rbac_routes
-from app.rbac.infrastructure.http.exception_mapper import (
-    register_rbac_exception_handlers,
-)
 
 # from app.db.pubsub import pubsub_client, topic_path
 from app.shared.infrastructure.cache.redis import redis_client
@@ -152,9 +147,9 @@ app = FastAPI(
 # Add request ID middleware
 app.add_middleware(RequestResponseMiddleware)
 
-# Register domain exception → HTTP response mappings
-register_auth_exception_handlers(app)
-register_rbac_exception_handlers(app)
+# Register domain exception → HTTP response mapping (single handler reads
+# status_code + headers off the exception class; see shared.exceptions).
+register_domain_exception_handler(app)
 
 # ──────────── JWKS at root ──────────── #
 app.include_router(jwks.router)

@@ -1,31 +1,32 @@
-class ProductNotFoundError(Exception):
-    def __str__(self) -> str:
-        return "Product not found"
+from shared.exceptions import ConflictError, NotFoundError
 
 
-class ProductVariantNotFoundError(Exception):
-    def __str__(self) -> str:
-        return "Product variant not found"
+class ProductNotFoundError(NotFoundError):
+    def __init__(self) -> None:
+        super().__init__("Product not found")
 
 
-class SkuAlreadyExistsError(Exception):
+class ProductVariantNotFoundError(NotFoundError):
+    def __init__(self) -> None:
+        super().__init__("Product variant not found")
+
+
+class SkuAlreadyExistsError(ConflictError):
     def __init__(self, sku: str) -> None:
         self.sku = sku
-
-    def __str__(self) -> str:
-        return f"SKU '{self.sku}' already exists"
+        super().__init__(f"SKU '{sku}' already exists")
 
 
-class CategoryNotFoundError(Exception):
-    def __str__(self) -> str:
-        return "Category not found"
+class CategoryNotFoundError(NotFoundError):
+    def __init__(self) -> None:
+        super().__init__("Category not found")
 
 
-class CategorySlugAlreadyExistsError(Exception):
-    def __str__(self) -> str:
-        return "Category slug already exists"
+class CategorySlugAlreadyExistsError(ConflictError):
+    def __init__(self) -> None:
+        super().__init__("Category slug already exists")
 
 
-class ProductSlugAlreadyExistsError(Exception):
-    def __str__(self) -> str:
-        return "Product slug already exists"
+class ProductSlugAlreadyExistsError(ConflictError):
+    def __init__(self) -> None:
+        super().__init__("Product slug already exists")

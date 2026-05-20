@@ -3,19 +3,14 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, FastAPI
+from shared.exceptions import register_domain_exception_handler
 from shared.logging import setup_dev_logging, setup_logging
 from shared.middleware import RequestResponseMiddleware
 from sqlalchemy import text
 
 from app.catalog.infrastructure.http import routes as catalog_routes
-from app.catalog.infrastructure.http.exception_mapper import (
-    register_catalog_exception_handlers,
-)
 from app.config import settings
 from app.inventory.infrastructure.http import routes as inventory_routes
-from app.inventory.infrastructure.http.exception_mapper import (
-    register_inventory_exception_handlers,
-)
 from app.shared.infrastructure.db.session import async_engine
 from app.shared.infrastructure.events.pubsub_publisher import ensure_topic
 from app.shared.infrastructure.http.jwks import jwks_client
@@ -69,8 +64,9 @@ app = FastAPI(
 
 app.add_middleware(RequestResponseMiddleware)
 
-register_catalog_exception_handlers(app)
-register_inventory_exception_handlers(app)
+# Register domain exception → HTTP response mapping (single handler reads
+# status_code + headers off the exception class; see shared.exceptions).
+register_domain_exception_handler(app)
 
 api_v1 = APIRouter(prefix="/api/v1")
 api_v1.include_router(catalog_routes.router)

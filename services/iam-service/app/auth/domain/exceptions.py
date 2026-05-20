@@ -1,12 +1,12 @@
-from app.shared.domain.exceptions import DomainError
+from shared.exceptions import AuthenticationError, ConflictError, DomainError
 
 
-class InvalidCredentialsError(DomainError):
+class InvalidCredentialsError(AuthenticationError):
     def __init__(self) -> None:
         super().__init__("Invalid email or password")
 
 
-class RefreshTokenInvalidError(DomainError):
+class RefreshTokenInvalidError(AuthenticationError):
     def __init__(self) -> None:
         super().__init__("Invalid or expired refresh token")
 
@@ -16,14 +16,19 @@ class DefaultRoleMissingError(DomainError):
         super().__init__("Default 'viewer' role not found. Run seed script first.")
 
 
-class UserExistsError(DomainError):
+class UserExistsError(ConflictError):
     def __init__(self) -> None:
         super().__init__("Email already exists")
 
 
-class TokenExpiredError(DomainError):
+class TokenExpiredError(AuthenticationError):
     """Raised when a JWT token has expired."""
 
 
-class InvalidTokenError(DomainError):
+class InvalidTokenError(AuthenticationError):
     """Raised when a JWT token is invalid or malformed."""
+
+
+class TokenRevokedError(AuthenticationError):
+    def __init__(self) -> None:
+        super().__init__("Token has been revoked")

@@ -46,7 +46,6 @@ Each of `auth/`, `rbac/`, `audit/` is independently layered:
 └── infrastructure/
     ├── composition.py        # FastAPI Depends wiring — only place concrete types are assembled
     ├── http/routes.py        # Thin handlers: validate → call use case → return schema
-    ├── http/exception_mapper.py  # Maps domain exceptions to HTTPException
     ├── orm/                  # SQLAlchemy ORM models
     └── repositories/         # SqlAlchemy implementations of domain ports
 ```
@@ -55,7 +54,7 @@ Each of `auth/`, `rbac/`, `audit/` is independently layered:
 
 ### Exception mapping pattern
 
-Domain exceptions never become `HTTPException` inside routes. Each bounded context registers its own handlers on the FastAPI app via `register_<context>_exception_handlers(app)` in `exception_mapper.py`. Routes just call use cases and let exceptions propagate.
+Domain exceptions never become `HTTPException` inside routes. Every domain exception inherits a tier from `shared.exceptions` (`AuthenticationError`, `AuthorizationError`, `NotFoundError`, `ConflictError`, `ValidationError`) which carries `status_code` and optional `headers` class attributes. `app.main` calls `register_domain_exception_handler(app)` once at startup — a single handler reads the status code and headers off the raised class. Routes just call use cases and let exceptions propagate.
 
 ### Shared modules
 - `app/shared/domain/` — canonical `User`, `Role`, `Permission`, `AuditLog` entities; `Email` and `ScopeKey` value objects; `DomainEvent` base class

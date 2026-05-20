@@ -38,12 +38,11 @@ ruff format app tests
 └── infrastructure/
     ├── composition.py            # FastAPI Depends wiring
     ├── http/routes.py            # Thin handlers only
-    ├── http/exception_mapper.py  # Maps domain exceptions → HTTPException
     ├── orm/                      # SQLAlchemy ORM models
     └── repositories/             # SqlAlchemy implementations + ORM↔domain mappers
 ```
 
-Each context's `infrastructure/http/exception_mapper.py` registers `@app.exception_handler` handlers — domain exceptions are never caught inside routes.
+Every domain exception inherits a tier from `shared.exceptions` (`NotFoundError`, `ConflictError`, etc.) that carries its `status_code`. `app.main` calls `register_domain_exception_handler(app)` once — domain exceptions are never caught inside routes.
 
 ### Shared modules
 - `app/shared/infrastructure/db/` — async engine, session factory, `Base` (all ORM models inherit from it)
