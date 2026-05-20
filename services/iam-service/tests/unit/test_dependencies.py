@@ -31,7 +31,7 @@ async def test_get_current_user_valid_token():
         "exp": 9999999999,
         "iss": "test",
         "iat": 0,
-        "username": "testuser",
+        "email": "test@example.com",
         "roles": [],
         "permissions": [],
     }
@@ -71,7 +71,7 @@ async def test_get_current_user_revoked_token():
         "exp": 9999999999,
         "iss": "test",
         "iat": 0,
-        "username": "testuser",
+        "email": "test@example.com",
         "roles": [],
         "permissions": [],
     }
@@ -105,7 +105,7 @@ async def test_require_super_user_with_super_user():
         "exp": 9999999999,
         "iss": "test",
         "iat": 0,
-        "username": "admin",
+        "email": "admin@example.com",
         "roles": [],
         "permissions": [],
     }

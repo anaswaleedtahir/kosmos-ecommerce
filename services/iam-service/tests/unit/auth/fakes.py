@@ -28,17 +28,15 @@ def make_role(
 
 def make_user(
     *,
-    username: str = "testuser",
+    email: str = "test@example.com",
     password_hash: str = "hashed_Password1!",
     is_active: bool = True,
     is_super_user: bool = False,
     roles: list[Role] | None = None,
-    email: str | None = None,
 ) -> User:
     return User(
         id=uuid.uuid4(),
-        username=username,
-        email=Email(email) if email else None,
+        email=Email(email),
         password_hash=password_hash,
         is_active=is_active,
         is_super_user=is_super_user,
@@ -53,12 +51,9 @@ class FakeUserRepository:
     def __init__(self, seed: list[User] | None = None) -> None:
         self._store: dict[uuid.UUID, User] = {u.id: u for u in (seed or [])}
 
-    async def find_by_username(self, username: str) -> User | None:
-        return next((u for u in self._store.values() if u.username == username), None)
-
     async def find_by_email(self, email: str) -> User | None:
         return next(
-            (u for u in self._store.values() if u.email and u.email.value == email),
+            (u for u in self._store.values() if u.email.value == email),
             None,
         )
 
@@ -172,7 +167,7 @@ class FakeTokenVerifier:
             "exp": 9999999999,
             "iat": 0,
             "iss": "test",
-            "username": "testuser",
+            "email": "test@example.com",
             "roles": [],
             "permissions": [],
             "is_super_user": False,

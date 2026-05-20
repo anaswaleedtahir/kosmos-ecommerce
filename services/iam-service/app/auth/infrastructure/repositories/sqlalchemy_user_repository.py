@@ -23,13 +23,6 @@ class SqlAlchemyUserRepository:
             selectinload(UserORM.roles).selectinload(RoleORM.permissions)
         )
 
-    async def find_by_username(self, username: str) -> User | None:
-        result = await self._session.execute(
-            self._base_query().where(UserORM.username == username)
-        )
-        orm = result.scalar_one_or_none()
-        return user_orm_to_domain(orm) if orm else None
-
     async def find_by_email(self, email: str) -> User | None:
         result = await self._session.execute(
             self._base_query().where(UserORM.email == email)
@@ -44,12 +37,10 @@ class SqlAlchemyUserRepository:
 
     async def add(self, user: User) -> User:
         orm = UserORM(
-            username=user.username,
-            email=user.email.value if user.email else None,
+            email=user.email.value,
             password_hash=user.password_hash,
             is_active=user.is_active,
             is_super_user=user.is_super_user,
-            organization_id=user.organization_id,
         )
         self._session.add(orm)
         await self._session.flush()

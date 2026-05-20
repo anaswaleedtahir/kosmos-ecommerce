@@ -8,28 +8,23 @@ from app.shared.infrastructure.cache.redis import redis_client
 IP_MAX_ATTEMPTS = 20  # per 60 seconds
 IP_WINDOW = 60  # seconds
 
-USERNAME_MAX_ATTEMPTS = 5  # per 300 seconds
-USERNAME_WINDOW = 300  # seconds
+EMAIL_MAX_ATTEMPTS = 5  # per 300 seconds
+EMAIL_WINDOW = 300  # seconds
 
 
 async def rate_limit_by_ip(request: Request) -> None:
-    # 1. Extract IP from request if not retuen
     ip_address = request.client.host if request.client else "unknown"
     if not ip_address:
         return
 
-    # 2. Build Redis key
     endpoint = request.url.path
     redis_key = f"rate_limit:ip:{ip_address}:{endpoint}"
 
-    # 3. INCR the counter
     count = await redis_client.incr(redis_key)
 
-    # 4. If count == 1: set TTL (first request in window)
     if count == 1:
         await redis_client.expire(redis_key, IP_WINDOW)
 
-    # 5. If count > limit: raise 429
     if count > IP_MAX_ATTEMPTS:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -38,33 +33,28 @@ async def rate_limit_by_ip(request: Request) -> None:
         )
 
 
-async def rate_limit_by_username(request: Request) -> None:
-    # 1. Parse username from request body without consuming stream
+async def rate_limit_by_email(request: Request) -> None:
     try:
         body_bytes = await request.body()
         body = json.loads(body_bytes)
     except Exception:
         return
-    username = body.get("username")
-    if not username or not isinstance(username, str):
+    email = body.get("email")
+    if not email or not isinstance(email, str):
         return
-    username = username.lower().strip()
+    email = email.lower().strip()
 
-    # 2. Build Redis key
     endpoint = request.url.path
-    redis_key = f"rate_limit:username:{username}:{endpoint}"
+    redis_key = f"rate_limit:email:{email}:{endpoint}"
 
-    # 3. Same INCR pattern
     count = await redis_client.incr(redis_key)
 
-    # 4. If count == 1: set TTL (first request in window)
     if count == 1:
-        await redis_client.expire(redis_key, USERNAME_WINDOW)
+        await redis_client.expire(redis_key, EMAIL_WINDOW)
 
-    # 5. raise 429 if exceeded
-    if count > USERNAME_MAX_ATTEMPTS:
+    if count > EMAIL_MAX_ATTEMPTS:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Rate limit exceeded (USERNAME). Try again later.",
-            headers={"Retry-After": str(USERNAME_WINDOW)},
+            detail="Rate limit exceeded (EMAIL). Try again later.",
+            headers={"Retry-After": str(EMAIL_WINDOW)},
         )

@@ -6,7 +6,7 @@ from typing import Protocol
 @dataclass
 class UserSummary:
     id: uuid.UUID
-    username: str
+    email: str
 
 
 class UserReader(Protocol):

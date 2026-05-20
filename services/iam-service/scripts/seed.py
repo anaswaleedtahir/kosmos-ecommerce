@@ -85,25 +85,23 @@ async def assign_permission_to_role(db, role: Role, permission: Permission) -> N
 
 
 async def get_or_create_superuser(db, admin_role: Role) -> None:
-    username = settings.seed_admin_username
+    email = settings.seed_admin_email
     password = settings.seed_admin_password
 
-    if not username or not password:
+    if not email or not password:
         logger.info(
-            "⏭️  SEED_ADMIN_USERNAME / SEED_ADMIN_PASSWORD unset — "
-            "skipping super_user seed"
+            "⏭️  SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD unset — skipping super_user seed"
         )
         return
 
-    result = await db.execute(select(User).where(User.username == username))
+    result = await db.execute(select(User).where(User.email == email))
     if result.scalar_one_or_none():
-        logger.info(f"⏭️  Super_user already exists: {username}")
+        logger.info(f"⏭️  Super_user already exists: {email}")
         return
 
     hasher = BcryptPasswordHasher()
     user = User(
-        username=username,
-        email=settings.seed_admin_email,
+        email=email,
         password_hash=hasher.hash(password),
         is_super_user=True,
         is_active=True,
@@ -111,7 +109,7 @@ async def get_or_create_superuser(db, admin_role: Role) -> None:
     db.add(user)
     await db.flush()
     db.add(UserRole(user_id=user.id, role_id=admin_role.id, assigned_by=user.id))
-    logger.info(f"✅ Created super_user: {username} (admin role assigned)")
+    logger.info(f"✅ Created super_user: {email} (admin role assigned)")
 
 
 async def seed(db) -> None:

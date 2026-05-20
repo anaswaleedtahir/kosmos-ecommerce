@@ -28,7 +28,7 @@ class LoginUseCase:
 
     async def execute(self, input: LoginInput) -> LoginResult:
         async with self._uow_factory() as uow:
-            user = await uow.users.find_by_username(input.username)
+            user = await uow.users.find_by_email(input.email)
             if not user or not user.is_authenticatable():
                 raise InvalidCredentialsError()
 
@@ -42,7 +42,7 @@ class LoginUseCase:
             access_token = self._token_issuer.issue(
                 TokenClaims(
                     sub=user.id,
-                    username=user.username,
+                    email=user.email.value,
                     roles=[role.name for role in user.roles],
                     permissions=[
                         perm.scope_key.key

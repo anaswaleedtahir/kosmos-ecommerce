@@ -4,6 +4,7 @@ import base64
 import hashlib
 import logging
 
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 from fastapi import APIRouter, HTTPException, status
 
@@ -37,6 +38,8 @@ async def jwks():
     try:
         # 1. Get the public key from the key pair
         public_key = key_pair.public_key
+        if not isinstance(public_key, RSAPublicKey):
+            raise TypeError(f"Expected RSA public key, got {type(public_key).__name__}")
 
         # 2. Extract the public key numbers (modulus and exponent)
         numbers = public_key.public_numbers()

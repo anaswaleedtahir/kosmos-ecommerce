@@ -22,7 +22,7 @@ class JwtTokenIssuer:
             "iat": now,
             "exp": expire,
             "jti": str(uuid.uuid4()),
-            "username": claims.username,
+            "email": claims.email,
             "roles": claims.roles,
             "permissions": claims.permissions,
             "is_super_user": claims.is_super_user,

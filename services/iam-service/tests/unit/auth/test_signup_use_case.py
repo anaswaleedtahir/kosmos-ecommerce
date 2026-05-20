@@ -34,37 +34,23 @@ async def test_signup_creates_user_with_viewer_role():
     use_case = _make_use_case(uow)
 
     result = await use_case.execute(
-        SignupInput(username="alice", password="Secret1!", email="alice@example.com")
+        SignupInput(email="alice@example.com", password="Secret1!")
     )
 
-    assert result.username == "alice"
     assert result.email == "alice@example.com"
     assert result.id is not None
     assert uow.committed
 
 
-async def test_signup_raises_when_username_exists():
-    existing = make_user(username="alice")
-    uow = _make_uow(users=FakeUserRepository([existing]))
-    use_case = _make_use_case(uow)
-
-    with pytest.raises(UserExistsError) as exc_info:
-        await use_case.execute(SignupInput(username="alice", password="Secret1!"))
-
-    assert exc_info.value.field == "username"
-
-
 async def test_signup_raises_when_email_exists():
-    existing = make_user(username="alice", email="alice@example.com")
+    existing = make_user(email="alice@example.com")
     uow = _make_uow(users=FakeUserRepository([existing]))
     use_case = _make_use_case(uow)
 
-    with pytest.raises(UserExistsError) as exc_info:
+    with pytest.raises(UserExistsError):
         await use_case.execute(
-            SignupInput(username="bob", password="Secret1!", email="alice@example.com")
+            SignupInput(email="alice@example.com", password="Secret1!")
         )
-
-    assert exc_info.value.field == "email"
 
 
 async def test_signup_raises_when_default_role_missing():
@@ -72,7 +58,9 @@ async def test_signup_raises_when_default_role_missing():
     use_case = _make_use_case(uow)
 
     with pytest.raises(DefaultRoleMissingError):
-        await use_case.execute(SignupInput(username="bob", password="Secret1!"))
+        await use_case.execute(
+            SignupInput(email="bob@example.com", password="Secret1!")
+        )
 
 
 async def test_signup_hashes_password():
@@ -80,8 +68,8 @@ async def test_signup_hashes_password():
     hasher = FakePasswordHasher()
     use_case = SignupUseCase(uow_factory=lambda: uow, hasher=hasher)
 
-    await use_case.execute(SignupInput(username="carol", password="Secret1!"))
+    await use_case.execute(SignupInput(email="carol@example.com", password="Secret1!"))
 
-    persisted = await uow.users.find_by_username("carol")
+    persisted = await uow.users.find_by_email("carol@example.com")
     assert persisted is not None
     assert persisted.password_hash == "hashed:Secret1!"

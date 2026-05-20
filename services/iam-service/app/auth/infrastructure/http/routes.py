@@ -23,8 +23,8 @@ from app.auth.infrastructure.http.schemas import (
 )
 from app.config import settings
 from app.shared.infrastructure.http.rate_limit import (
+    rate_limit_by_email,
     rate_limit_by_ip,
-    rate_limit_by_username,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -49,7 +49,6 @@ async def signup(
     result = await use_case.execute(data.to_input())
     return UserResponse(
         id=result.id,
-        username=result.username,
         email=result.email,  # type: ignore[arg-type]
         created_at=result.created_at,  # type: ignore[arg-type]
     )
@@ -61,7 +60,7 @@ async def login(
     response: Response,
     use_case: LoginUseCase = Depends(get_login_use_case),
     _ip: None = Depends(rate_limit_by_ip),
-    _user: None = Depends(rate_limit_by_username),
+    _email: None = Depends(rate_limit_by_email),
 ) -> TokenResponse:
     result = await use_case.execute(data.to_input())
     response.set_cookie(value=result.refresh_token, **COOKIE_SETTINGS)
@@ -95,7 +94,7 @@ async def logout(
 async def me(payload: TokenPayload = Depends(get_current_user)) -> MeResponse:
     return MeResponse(
         id=payload["sub"],  # type: ignore[arg-type]
-        username=payload["username"],  # type: ignore[arg-type]
+        email=payload["email"],  # type: ignore[arg-type]
         roles=payload["roles"],  # type: ignore[arg-type]
         permissions=payload["permissions"],  # type: ignore[arg-type]
         is_super_user=payload["is_super_user"],  # type: ignore[arg-type]

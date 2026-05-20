@@ -91,7 +91,7 @@ def test_user_role_assigned_audit_context():
     user_id = uuid.uuid4()
     event = UserRoleAssigned(
         user_id=user_id,
-        user_name="alice",
+        user_email="alice@example.com",
         role_id=uuid.uuid4(),
         role_name="editor",
         actor_id=uuid.uuid4(),
@@ -102,14 +102,14 @@ def test_user_role_assigned_audit_context():
     assert ctx.action == "USER_ROLE_ASSIGNED"
     assert ctx.entity_type == "UserRole"
     assert ctx.entity_id == user_id
-    assert ctx.payload == {"user": "alice", "role": "editor"}
+    assert ctx.payload == {"user": "alice@example.com", "role": "editor"}
 
 
 def test_user_role_revoked_audit_context():
     user_id = uuid.uuid4()
     event = UserRoleRevoked(
         user_id=user_id,
-        user_name="alice",
+        user_email="alice@example.com",
         role_id=uuid.uuid4(),
         role_name="editor",
         actor_id=uuid.uuid4(),
@@ -120,4 +120,4 @@ def test_user_role_revoked_audit_context():
     assert ctx.action == "USER_ROLE_REVOKED"
     assert ctx.entity_type == "UserRole"
     assert ctx.entity_id == user_id
-    assert ctx.payload == {"user": "alice", "role": "editor"}
+    assert ctx.payload == {"user": "alice@example.com", "role": "editor"}

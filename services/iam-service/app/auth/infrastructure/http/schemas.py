@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 from app.auth.application.dto import (
     LoginInput,
@@ -15,9 +15,8 @@ from app.shared.infrastructure.http.schemas import OrmSchema
 class SignupRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    username: str = Field(min_length=3, max_length=50)
+    email: EmailStr
     password: str
-    email: EmailStr | None = None
 
     @field_validator("password")
     @classmethod
@@ -33,19 +32,15 @@ class SignupRequest(BaseModel):
         return v
 
     def to_input(self) -> SignupInput:
-        return SignupInput(
-            username=self.username,
-            password=self.password,
-            email=str(self.email) if self.email else None,
-        )
+        return SignupInput(email=str(self.email), password=self.password)
 
 
 class LoginRequest(BaseModel):
-    username: str
+    email: EmailStr
     password: str
 
     def to_input(self) -> LoginInput:
-        return LoginInput(username=self.username, password=self.password)
+        return LoginInput(email=str(self.email), password=self.password)
 
 
 class TokenResponse(BaseModel):
@@ -55,14 +50,13 @@ class TokenResponse(BaseModel):
 
 class UserResponse(OrmSchema):
     id: UUID
-    username: str
-    email: EmailStr | None = None
+    email: EmailStr
     created_at: datetime
 
 
 class MeResponse(OrmSchema):
     id: UUID
-    username: str
+    email: EmailStr
     roles: list[str]
     permissions: list[str]
     is_super_user: bool

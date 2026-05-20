@@ -32,12 +32,10 @@ def _role_orm_to_domain(orm: RoleORM) -> Role:
 def user_orm_to_domain(orm: UserORM) -> User:
     return User(
         id=orm.id,
-        username=orm.username,
-        email=Email(orm.email) if orm.email else None,
+        email=Email(orm.email),
         password_hash=orm.password_hash,
         is_active=orm.is_active,
         is_super_user=orm.is_super_user,
-        organization_id=orm.organization_id,
         roles=[_role_orm_to_domain(r) for r in orm.roles],
         created_at=orm.created_at,
         updated_at=orm.updated_at,
@@ -46,8 +44,7 @@ def user_orm_to_domain(orm: UserORM) -> User:
 
 def apply_domain_to_user_orm(domain: User, orm: UserORM) -> None:
     """Mutate an existing ORM instance with updated domain fields."""
-    orm.username = domain.username
-    orm.email = domain.email.value if domain.email else None
+    orm.email = domain.email.value
     orm.password_hash = domain.password_hash
     orm.is_active = domain.is_active
     orm.is_super_user = domain.is_super_user

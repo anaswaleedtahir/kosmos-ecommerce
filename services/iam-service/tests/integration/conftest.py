@@ -108,7 +108,6 @@ def override_get_db(db):
 async def admin_user(db):
     """Create a user with super_user privileges for admin endpoints."""
     admin = User(
-        username="admin",
         email="admin@example.com",
         password_hash=_hasher.hash("AdminPass123!"),
         is_super_user=True,
@@ -142,7 +141,7 @@ async def admin_token(admin_user, mock_jwt):
         "iat": now,
         "exp": expire,
         "jti": str(uuid4()),
-        "username": admin_user.username,
+        "email": admin_user.email,
         "roles": ["admin"],
         "permissions": ["*"],
         "is_super_user": True,
@@ -159,7 +158,6 @@ async def admin_token(admin_user, mock_jwt):
 async def regular_user(db):
     """Create a regular user for role assignment tests."""
     user = User(
-        username="regularuser",
         email="user@example.com",
         password_hash=_hasher.hash("UserPass123!"),
         is_super_user=False,

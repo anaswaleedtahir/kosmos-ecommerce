@@ -7,7 +7,7 @@ from typing import Protocol
 @dataclass
 class TokenClaims:
     sub: uuid.UUID
-    username: str
+    email: str
     roles: list[str]
     permissions: list[str]
     is_super_user: bool

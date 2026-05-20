@@ -514,7 +514,7 @@ async def test_admin_routes_require_super_user(client: AsyncClient, mock_jwt):
         "iat": now,
         "exp": expire,
         "jti": str(uuid4()),
-        "username": "regularuser",
+        "email": "regular@example.com",
         "roles": ["viewer"],
         "permissions": ["users:read"],
         "is_super_user": False,  # Not a super user

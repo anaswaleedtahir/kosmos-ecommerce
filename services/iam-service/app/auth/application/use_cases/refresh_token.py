@@ -36,7 +36,7 @@ class RefreshTokenUseCase:
             access_token = self._token_issuer.issue(
                 TokenClaims(
                     sub=user.id,
-                    username=user.username,
+                    email=user.email.value,
                     roles=[role.name for role in user.roles],
                     permissions=[
                         perm.scope_key.key

@@ -27,7 +27,7 @@ class RevokeRoleFromUserUseCase:
                 UserRoleRevoked(
                     actor_id=input.actor_id,
                     user_id=user.id,
-                    user_name=user.username,
+                    user_email=user.email,
                     role_id=role.id,
                     role_name=role.name,
                 )

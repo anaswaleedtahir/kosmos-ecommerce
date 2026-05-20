@@ -1,5 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from app.auth.domain.ports.role_repository import RoleRepository
+from app.auth.domain.ports.user_repository import UserRepository
 from app.auth.infrastructure.repositories.sqlalchemy_role_repository import (
     SqlAlchemyRoleRepository,
 )
@@ -10,6 +12,9 @@ from app.shared.domain.events import DomainEvent
 
 
 class SqlAlchemyAuthUnitOfWork:
+    users: UserRepository
+    roles: RoleRepository
+
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self._session_factory = session_factory
         self._session: AsyncSession | None = None

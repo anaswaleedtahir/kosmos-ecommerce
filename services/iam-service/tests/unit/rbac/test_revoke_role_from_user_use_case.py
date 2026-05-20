@@ -45,7 +45,7 @@ async def test_revoke_role_from_user_success():
 
 
 async def test_revoke_role_from_user_emits_domain_event():
-    user = make_user_summary(username="carol")
+    user = make_user_summary(email="carol@example.com")
     role = make_role(name="editor")
     uow = FakeRbacUnitOfWork(
         roles=FakeRoleRepository([role]),
@@ -61,7 +61,7 @@ async def test_revoke_role_from_user_emits_domain_event():
     assert len(events) == 1
     event = events[0]
     assert isinstance(event, UserRoleRevoked)
-    assert event.user_name == "carol"
+    assert event.user_email == "carol@example.com"
     assert event.role_name == "editor"
 
 

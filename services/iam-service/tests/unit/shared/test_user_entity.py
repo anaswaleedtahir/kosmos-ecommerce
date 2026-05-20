@@ -1,12 +1,13 @@
 import uuid
 
 from app.shared.domain.entities.user import User
+from app.shared.domain.values.email import Email
 
 
 def _user(is_active: bool) -> User:
     return User(
         id=uuid.uuid4(),
-        username="alice",
+        email=Email("alice@example.com"),
         password_hash="x",
         is_active=is_active,
         is_super_user=False,

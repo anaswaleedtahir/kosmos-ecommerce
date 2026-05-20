@@ -36,8 +36,8 @@ def make_role(
     )
 
 
-def make_user_summary(username: str = "alice") -> UserSummary:
-    return UserSummary(id=uuid.uuid4(), username=username)
+def make_user_summary(email: str = "alice@example.com") -> UserSummary:
+    return UserSummary(id=uuid.uuid4(), email=email)
 
 
 # ── Repository fakes ──────────────────────────────────────────────────────────

@@ -5,22 +5,20 @@ from datetime import datetime
 
 @dataclass
 class SignupInput:
-    username: str
+    email: str
     password: str
-    email: str | None = None
 
 
 @dataclass
 class SignupResult:
     id: uuid.UUID
-    username: str
-    email: str | None
+    email: str
     created_at: datetime | None
 
 
 @dataclass
 class LoginInput:
-    username: str
+    email: str
     password: str
 
 

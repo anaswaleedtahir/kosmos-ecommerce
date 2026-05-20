@@ -13,7 +13,7 @@ class SqlAlchemyUserReader:
 
     async def find_summary_by_id(self, id: uuid.UUID) -> UserSummary | None:
         result = await self._session.execute(
-            select(UserORM.id, UserORM.username).where(UserORM.id == id)
+            select(UserORM.id, UserORM.email).where(UserORM.id == id)
         )
         row = result.first()
-        return UserSummary(id=row.id, username=row.username) if row else None
+        return UserSummary(id=row.id, email=row.email) if row else None

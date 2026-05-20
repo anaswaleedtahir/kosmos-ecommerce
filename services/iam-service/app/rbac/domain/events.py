@@ -80,7 +80,7 @@ class PermissionRevoked(DomainEvent):
 @dataclass(frozen=True, kw_only=True)
 class UserRoleAssigned(DomainEvent):
     user_id: uuid.UUID
-    user_name: str
+    user_email: str
     role_id: uuid.UUID
     role_name: str
 
@@ -89,14 +89,14 @@ class UserRoleAssigned(DomainEvent):
             action="USER_ROLE_ASSIGNED",
             entity_type="UserRole",
             entity_id=self.user_id,
-            payload={"user": self.user_name, "role": self.role_name},
+            payload={"user": self.user_email, "role": self.role_name},
         )
 
 
 @dataclass(frozen=True, kw_only=True)
 class UserRoleRevoked(DomainEvent):
     user_id: uuid.UUID
-    user_name: str
+    user_email: str
     role_id: uuid.UUID
     role_name: str
 
@@ -105,5 +105,5 @@ class UserRoleRevoked(DomainEvent):
             action="USER_ROLE_REVOKED",
             entity_type="UserRole",
             entity_id=self.user_id,
-            payload={"user": self.user_name, "role": self.role_name},
+            payload={"user": self.user_email, "role": self.role_name},
         )

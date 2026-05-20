@@ -1,11 +1,9 @@
-from typing import Literal
-
 from app.shared.domain.exceptions import DomainError
 
 
 class InvalidCredentialsError(DomainError):
     def __init__(self) -> None:
-        super().__init__("Invalid username or password")
+        super().__init__("Invalid email or password")
 
 
 class RefreshTokenInvalidError(DomainError):
@@ -19,9 +17,8 @@ class DefaultRoleMissingError(DomainError):
 
 
 class UserExistsError(DomainError):
-    def __init__(self, field: Literal["username", "email"]) -> None:
-        self.field = field
-        super().__init__(f"{field.capitalize()} already exists")
+    def __init__(self) -> None:
+        super().__init__("Email already exists")
 
 
 class TokenExpiredError(DomainError):

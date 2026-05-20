@@ -13,7 +13,7 @@ class TokenPayload(TypedDict):
     iat: float
     exp: float
     jti: str
-    username: str
+    email: str
     roles: list[str]
     permissions: list[str]
     is_super_user: bool

@@ -40,7 +40,7 @@ async def test_assign_role_to_user_success():
 
 
 async def test_assign_role_to_user_emits_domain_event():
-    user = make_user_summary(username="bob")
+    user = make_user_summary(email="bob@example.com")
     role = make_role(name="analyst")
     uow = FakeRbacUnitOfWork(
         roles=FakeRoleRepository([role]),
@@ -56,7 +56,7 @@ async def test_assign_role_to_user_emits_domain_event():
     assert len(events) == 1
     event = events[0]
     assert isinstance(event, UserRoleAssigned)
-    assert event.user_name == "bob"
+    assert event.user_email == "bob@example.com"
     assert event.role_name == "analyst"
 
 

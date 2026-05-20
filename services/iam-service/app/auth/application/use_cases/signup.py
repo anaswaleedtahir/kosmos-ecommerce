@@ -22,12 +22,8 @@ class SignupUseCase:
 
     async def execute(self, input: SignupInput) -> SignupResult:
         async with self._uow_factory() as uow:
-            if await uow.users.find_by_username(input.username):
-                raise UserExistsError("username")
-
-            if input.email:
-                if await uow.users.find_by_email(input.email):
-                    raise UserExistsError("email")
+            if await uow.users.find_by_email(input.email):
+                raise UserExistsError()
 
             password_hash = self._hasher.hash(input.password)
 
@@ -37,8 +33,7 @@ class SignupUseCase:
 
             new_user = User(
                 id=uuid.uuid4(),
-                username=input.username,
-                email=Email(input.email) if input.email else None,
+                email=Email(input.email),
                 password_hash=password_hash,
                 is_active=True,
                 is_super_user=False,
@@ -50,7 +45,6 @@ class SignupUseCase:
 
         return SignupResult(
             id=persisted.id,
-            username=persisted.username,
-            email=persisted.email.value if persisted.email else None,
+            email=persisted.email.value,
             created_at=persisted.created_at,
         )
