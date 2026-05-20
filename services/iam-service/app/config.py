@@ -83,5 +83,10 @@ class Settings(BaseSettings):
     gcp_project_id: str = Field(default=...)
     pubsub_topic_id: str = Field(default=...)
 
+    # ──────────── SEED ──────────── #
+    seed_admin_username: str | None = None
+    seed_admin_password: str | None = None
+    seed_admin_email: str | None = None
+
 
 settings = Settings()

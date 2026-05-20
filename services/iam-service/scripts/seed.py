@@ -10,8 +10,16 @@ workspace_root = Path(__file__).parent.parent
 if str(workspace_root) not in sys.path:
     sys.path.insert(0, str(workspace_root))
 
-from app.rbac.infrastructure.orm.association import RolePermission  # noqa: E402
+from app.auth.infrastructure.orm.user import User  # noqa: E402, F401
+from app.config import settings  # noqa: E402
+from app.rbac.infrastructure.orm.association import (  # noqa: E402
+    RolePermission,
+    UserRole,
+)
 from app.rbac.infrastructure.orm.role import Permission, Role  # noqa: E402
+from app.shared.infrastructure.crypto.bcrypt_password_hasher import (  # noqa: E402
+    BcryptPasswordHasher,
+)
 from app.shared.infrastructure.db.session import async_session_factory  # noqa: E402
 
 logging.basicConfig(level=logging.INFO)
@@ -76,6 +84,36 @@ async def assign_permission_to_role(db, role: Role, permission: Permission) -> N
         logger.info(f"✅ Assigned {permission.scope_key} → {role.name}")
 
 
+async def get_or_create_superuser(db, admin_role: Role) -> None:
+    username = settings.seed_admin_username
+    password = settings.seed_admin_password
+
+    if not username or not password:
+        logger.info(
+            "⏭️  SEED_ADMIN_USERNAME / SEED_ADMIN_PASSWORD unset — "
+            "skipping super_user seed"
+        )
+        return
+
+    result = await db.execute(select(User).where(User.username == username))
+    if result.scalar_one_or_none():
+        logger.info(f"⏭️  Super_user already exists: {username}")
+        return
+
+    hasher = BcryptPasswordHasher()
+    user = User(
+        username=username,
+        email=settings.seed_admin_email,
+        password_hash=hasher.hash(password),
+        is_super_user=True,
+        is_active=True,
+    )
+    db.add(user)
+    await db.flush()
+    db.add(UserRole(user_id=user.id, role_id=admin_role.id, assigned_by=user.id))
+    logger.info(f"✅ Created super_user: {username} (admin role assigned)")
+
+
 async def seed(db) -> None:
     # ──────────── ROLES ──────────── #
     viewer = await get_or_create_role(db, "viewer", "Default read-only role")
@@ -108,6 +146,9 @@ async def seed(db) -> None:
     # admin gets everything
     for perm in created_permissions:
         await assign_permission_to_role(db, admin, perm)
+
+    # ──────────── SUPER_USER ──────────── #
+    await get_or_create_superuser(db, admin)
 
     await db.commit()
     logger.info("🎉 Seed completed successfully")
