@@ -6,8 +6,8 @@ import { useEffect, useState } from 'react';
 import { Btn } from '@kosmos/design/btn';
 import { Field } from '@kosmos/design/field';
 import { useBag } from '@/components/providers/BagProvider';
-import { getProduct } from '@/lib/catalog';
 import { eur } from '@/lib/format';
+import type { Product } from '@/lib/types';
 import { generateOrderNo, saveOrder, type Order } from '@/lib/order';
 import { CheckoutHeader } from './CheckoutHeader';
 
@@ -26,7 +26,7 @@ const DEFAULT_INFO = {
   phone: '+33 6 14 22 88 41',
 };
 
-export function CheckoutClient() {
+export function CheckoutClient({ products }: { products: Product[] }) {
   const router = useRouter();
   const { lines, clear } = useBag();
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -43,7 +43,7 @@ export function CheckoutClient() {
 
   const resolved = lines
     .map((b) => {
-      const p = getProduct(b.pid);
+      const p = products.find((x) => x.id === b.pid);
       const v = p?.variants.find((x) => x.id === b.vid);
       return p && v ? { ...b, p, v } : null;
     })

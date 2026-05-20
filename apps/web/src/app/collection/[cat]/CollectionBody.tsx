@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { ViewTransition } from 'react';
-import { CATEGORIES, FAMILIES, getProducts } from '@/lib/catalog';
+import { CATEGORIES, FAMILIES } from '@/lib/catalog';
 import { ProductTile } from '@/components/ProductTile';
 import type { Category, Product } from '@/lib/types';
 
@@ -23,9 +23,10 @@ interface Filters {
 
 interface Props {
   cat: string;
+  initialProducts: Product[];
 }
 
-export function CollectionBody({ cat }: Props) {
+export function CollectionBody({ cat, initialProducts }: Props) {
   const [, startTransition] = useTransition();
   const [filters, setFilters] = useState<Filters>({
     cats: cat === 'all' ? [] : [cat as Category],
@@ -43,7 +44,7 @@ export function CollectionBody({ cat }: Props) {
   };
 
   const products = useMemo(() => {
-    let list: Product[] = [...getProducts()];
+    let list: Product[] = [...initialProducts];
     if (filters.cats.length) list = list.filter((p) => filters.cats.includes(p.cat));
     if (filters.families.length)
       list = list.filter((p) => filters.families.includes(p.family));
@@ -54,7 +55,7 @@ export function CollectionBody({ cat }: Props) {
     if (filters.sort === 'asc') list.sort((a, b) => priceOf(a) - priceOf(b));
     if (filters.sort === 'desc') list.sort((a, b) => priceOf(b) - priceOf(a));
     return list;
-  }, [filters]);
+  }, [filters, initialProducts]);
 
   const toggleCat = (id: Category) =>
     updateFilters((f) => ({
@@ -112,7 +113,7 @@ export function CollectionBody({ cat }: Props) {
               <FilterCheck
                 key={c.id}
                 label={c.label}
-                count={getProducts().filter((p) => p.cat === c.id).length}
+                count={initialProducts.filter((p) => p.cat === c.id).length}
                 checked={filters.cats.includes(c.id)}
                 onChange={() => toggleCat(c.id)}
               />
@@ -123,7 +124,7 @@ export function CollectionBody({ cat }: Props) {
               <FilterCheck
                 key={f}
                 label={f}
-                count={getProducts().filter((p) => p.family === f).length}
+                count={initialProducts.filter((p) => p.family === f).length}
                 checked={filters.families.includes(f)}
                 onChange={() => toggleFamily(f)}
               />

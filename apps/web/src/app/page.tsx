@@ -3,7 +3,7 @@ import Link from "next/link";
 import { preload } from "react-dom";
 import { CapsLink } from "@kosmos/design/caps-link";
 import { ProductTile } from "@/components/ProductTile";
-import { getProduct } from "@/lib/catalog";
+import { getProducts } from "@/lib/catalog-api";
 
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=2200&q=80";
@@ -39,10 +39,11 @@ const BOUTIQUE_IMAGE =
 const EDITORIAL_IMAGE =
   "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=1400&q=80";
 
-export default function HomePage() {
+export default async function HomePage() {
   preload(HERO_IMAGE, { as: "image" });
 
-  const arrivals = ARRIVAL_IDS.map((id) => getProduct(id)).filter(
+  const allProducts = await getProducts();
+  const arrivals = ARRIVAL_IDS.map((id) => allProducts.find((p) => p.id === id)).filter(
     (p): p is NonNullable<typeof p> => p !== undefined,
   );
 

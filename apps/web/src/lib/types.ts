@@ -11,6 +11,7 @@ export type Variant = {
 
 export type Product = {
   id: string;
+  uuid: string;
   cat: Category;
   no: string;
   name: string;

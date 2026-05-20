@@ -1,7 +1,7 @@
 from app.catalog.application.dto import (
     ProductResult,
-    ProductVariantResult,
     SetProductStatusInput,
+    product_to_result,
 )
 from app.catalog.domain.events import ProductPublished
 from app.catalog.domain.exceptions import ProductNotFoundError
@@ -35,23 +35,4 @@ class SetProductStatusUseCase:
             await uow.products.save(product)
             await uow.commit()
 
-        return ProductResult(
-            id=product.id,
-            name=product.name,
-            description=product.description,
-            category_id=product.category_id,
-            status=product.status,
-            created_by=product.created_by,
-            variants=[
-                ProductVariantResult(
-                    id=v.id,
-                    sku=v.sku,
-                    price=v.price,
-                    attributes=v.attributes,
-                    is_active=v.is_active,
-                )
-                for v in product.variants
-            ],
-            created_at=product.created_at,
-            updated_at=product.updated_at,
-        )
+        return product_to_result(product)

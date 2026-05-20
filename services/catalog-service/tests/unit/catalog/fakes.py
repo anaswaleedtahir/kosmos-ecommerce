@@ -22,6 +22,8 @@ def make_product(
     name: str = "Laptop",
     status: ProductStatus = ProductStatus.INACTIVE,
     category_id: uuid.UUID | None = None,
+    slug: str = "laptop",
+    storefront_metadata: dict | None = None,
 ) -> Product:
     return Product(
         id=uuid.uuid4(),
@@ -30,6 +32,8 @@ def make_product(
         category_id=category_id or uuid.uuid4(),
         status=status,
         created_by=uuid.uuid4(),
+        slug=slug,
+        storefront_metadata=storefront_metadata or {},
         variants=[],
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
@@ -67,6 +71,12 @@ class FakeProductRepository:
     async def find_by_id(self, id: uuid.UUID) -> Product | None:
         return self._products.get(id)
 
+    async def find_by_slug(self, slug: str) -> Product | None:
+        return next((p for p in self._products.values() if p.slug == slug), None)
+
+    async def slug_exists(self, slug: str) -> bool:
+        return any(p.slug == slug for p in self._products.values())
+
     async def list_active(self, limit: int, offset: int) -> list[Product]:
         active = [
             p for p in self._products.values() if p.status == ProductStatus.ACTIVE
@@ -80,6 +90,8 @@ class FakeProductRepository:
         description: str | None,
         category_id: uuid.UUID,
         created_by: uuid.UUID,
+        slug: str = "",
+        storefront_metadata: dict | None = None,
     ) -> Product:
         product = Product(
             id=uuid.uuid4(),
@@ -88,6 +100,8 @@ class FakeProductRepository:
             category_id=category_id,
             status=ProductStatus.INACTIVE,
             created_by=created_by,
+            slug=slug,
+            storefront_metadata=storefront_metadata or {},
             variants=[],
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),

@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CapsLink } from '@kosmos/design/caps-link';
-import { getCategory, getProduct, getRelated } from '@/lib/catalog';
+import { getCategory } from '@/lib/catalog';
+import { getProduct, getRelated } from '@/lib/catalog-api';
 import { ProductTile } from '@/components/ProductTile';
 import { PDPClient } from './PDPClient';
 
@@ -11,11 +12,11 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getProduct(slug);
   if (!product) notFound();
 
   const category = getCategory(product.cat);
-  const related = getRelated(product);
+  const related = await getRelated(product);
 
   return (
     <div className="bg-paper">

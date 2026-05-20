@@ -23,3 +23,7 @@ class ReserveRequest(BaseModel):
 
 class ReleaseRequest(BaseModel):
     quantity: int = Field(gt=0)
+
+
+class BatchInventoryResponse(BaseModel):
+    items: list[InventoryResponse]

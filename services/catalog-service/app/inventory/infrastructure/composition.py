@@ -1,4 +1,7 @@
 from app.inventory.application.use_cases.get_inventory import GetInventoryUseCase
+from app.inventory.application.use_cases.get_inventory_batch import (
+    GetInventoryBatchUseCase,
+)
 from app.inventory.application.use_cases.release_reservation import (
     ReleaseReservationUseCase,
 )
@@ -14,6 +17,10 @@ def _uow_factory() -> SqlAlchemyInventoryUnitOfWork:
 
 def get_get_inventory_use_case() -> GetInventoryUseCase:
     return GetInventoryUseCase(uow_factory=_uow_factory)
+
+
+def get_get_inventory_batch_use_case() -> GetInventoryBatchUseCase:
+    return GetInventoryBatchUseCase(uow_factory=_uow_factory)
 
 
 def get_restock_use_case() -> RestockUseCase:

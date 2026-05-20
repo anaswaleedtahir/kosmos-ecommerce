@@ -1,4 +1,8 @@
-from app.catalog.application.dto import ProductVariantResult, UpdateVariantInput
+from app.catalog.application.dto import (
+    ProductVariantResult,
+    UpdateVariantInput,
+    variant_to_result,
+)
 from app.catalog.domain.exceptions import (
     ProductNotFoundError,
     ProductVariantNotFoundError,
@@ -35,10 +39,4 @@ class UpdateVariantUseCase:
             await uow.products.save_variant(variant)
             await uow.commit()
 
-        return ProductVariantResult(
-            id=variant.id,
-            sku=variant.sku,
-            price=variant.price,
-            attributes=variant.attributes,
-            is_active=variant.is_active,
-        )
+        return variant_to_result(variant)

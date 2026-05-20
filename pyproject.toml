@@ -9,6 +9,9 @@ members = [
     "services/*",
     "packages/*",
 ]
+exclude = [
+    "packages/kosmos-design",
+]
 
 [tool.ruff]
 line-length = 88

@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 
 from app.inventory.application.dto import (
     ReleaseReservationInput,
@@ -8,18 +8,23 @@ from app.inventory.application.dto import (
     RestockInput,
 )
 from app.inventory.application.use_cases.get_inventory import GetInventoryUseCase
+from app.inventory.application.use_cases.get_inventory_batch import (
+    GetInventoryBatchUseCase,
+)
 from app.inventory.application.use_cases.release_reservation import (
     ReleaseReservationUseCase,
 )
 from app.inventory.application.use_cases.reserve_stock import ReserveStockUseCase
 from app.inventory.application.use_cases.restock import RestockUseCase
 from app.inventory.infrastructure.composition import (
+    get_get_inventory_batch_use_case,
     get_get_inventory_use_case,
     get_release_reservation_use_case,
     get_reserve_stock_use_case,
     get_restock_use_case,
 )
 from app.inventory.infrastructure.http.schemas import (
+    BatchInventoryResponse,
     InventoryResponse,
     ReleaseRequest,
     ReserveRequest,
@@ -28,6 +33,17 @@ from app.inventory.infrastructure.http.schemas import (
 from app.shared.infrastructure.http.dependencies import require_catalog_write
 
 router = APIRouter(prefix="/inventory", tags=["inventory"])
+
+
+@router.get("/variants", response_model=BatchInventoryResponse)
+async def get_inventory_batch(
+    variant_ids: list[uuid.UUID] = Query(..., alias="variant_ids"),
+    use_case: GetInventoryBatchUseCase = Depends(get_get_inventory_batch_use_case),
+) -> BatchInventoryResponse:
+    results = await use_case.execute(variant_ids)
+    return BatchInventoryResponse(
+        items=[InventoryResponse(**r.__dict__) for r in results]
+    )
 
 
 @router.get("/variants/{variant_id}", response_model=InventoryResponse)

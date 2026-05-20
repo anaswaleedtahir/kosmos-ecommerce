@@ -1,4 +1,8 @@
-from app.catalog.application.dto import CreateVariantInput, ProductVariantResult
+from app.catalog.application.dto import (
+    CreateVariantInput,
+    ProductVariantResult,
+    variant_to_result,
+)
 from app.catalog.domain.exceptions import ProductNotFoundError, SkuAlreadyExistsError
 from app.catalog.domain.ports.unit_of_work import CatalogUnitOfWorkFactory
 
@@ -23,10 +27,4 @@ class CreateVariantUseCase:
             )
             await uow.commit()
 
-        return ProductVariantResult(
-            id=variant.id,
-            sku=variant.sku,
-            price=variant.price,
-            attributes=variant.attributes,
-            is_active=variant.is_active,
-        )
+        return variant_to_result(variant)

@@ -4,6 +4,7 @@ from app.catalog.domain.exceptions import (
     CategoryNotFoundError,
     CategorySlugAlreadyExistsError,
     ProductNotFoundError,
+    ProductSlugAlreadyExistsError,
     ProductVariantNotFoundError,
     SkuAlreadyExistsError,
 )
@@ -17,6 +18,7 @@ def register_catalog_exception_handlers(app: FastAPI) -> None:
             ProductNotFoundError: 404,
             ProductVariantNotFoundError: 404,
             SkuAlreadyExistsError: 409,
+            ProductSlugAlreadyExistsError: 409,
             CategoryNotFoundError: 404,
             CategorySlugAlreadyExistsError: 409,
         },

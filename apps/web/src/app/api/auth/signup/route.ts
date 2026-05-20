@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const upstream = await fetch(`${IAM}/api/v1/auth/login`, {
+    const upstream = await fetch(`${IAM}/api/v1/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -24,8 +24,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(data, { status: upstream.status });
     }
 
-    const res = NextResponse.json({ ok: true });
-    forwardSetCookie(upstream, res);
+    const loginUpstream = await fetch(`${IAM}/api/v1/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: body.username, password: body.password }),
+    });
+
+    const res = NextResponse.json({ ok: true }, { status: 201 });
+    if (loginUpstream.ok) forwardSetCookie(loginUpstream, res);
     return res;
   } catch {
     return NextResponse.json({ detail: "Auth service unavailable." }, { status: 503 });

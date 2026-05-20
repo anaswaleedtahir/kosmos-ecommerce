@@ -24,3 +24,8 @@ class CategoryNotFoundError(Exception):
 class CategorySlugAlreadyExistsError(Exception):
     def __str__(self) -> str:
         return "Category slug already exists"
+
+
+class ProductSlugAlreadyExistsError(Exception):
+    def __str__(self) -> str:
+        return "Product slug already exists"

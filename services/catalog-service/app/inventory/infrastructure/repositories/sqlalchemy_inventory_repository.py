@@ -29,6 +29,16 @@ class SqlAlchemyInventoryRepository:
         orm = result.scalar_one_or_none()
         return _inventory_orm_to_domain(orm) if orm else None
 
+    async def find_by_variant_ids(
+        self, variant_ids: list[uuid.UUID]
+    ) -> list[Inventory]:
+        if not variant_ids:
+            return []
+        result = await self._session.execute(
+            select(InventoryORM).where(InventoryORM.variant_id.in_(variant_ids))
+        )
+        return [_inventory_orm_to_domain(row) for row in result.scalars().all()]
+
     async def add(self, *, variant_id: uuid.UUID) -> Inventory:
         orm = InventoryORM(variant_id=variant_id)
         self._session.add(orm)

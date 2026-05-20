@@ -3,6 +3,9 @@ from app.catalog.application.use_cases.create_product import CreateProductUseCas
 from app.catalog.application.use_cases.create_variant import CreateVariantUseCase
 from app.catalog.application.use_cases.delete_variant import DeleteVariantUseCase
 from app.catalog.application.use_cases.get_product import GetProductUseCase
+from app.catalog.application.use_cases.get_product_by_slug import (
+    GetProductBySlugUseCase,
+)
 from app.catalog.application.use_cases.list_categories import ListCategoriesUseCase
 from app.catalog.application.use_cases.list_products import ListProductsUseCase
 from app.catalog.application.use_cases.set_product_status import SetProductStatusUseCase
@@ -30,6 +33,10 @@ def get_set_product_status_use_case() -> SetProductStatusUseCase:
 
 def get_get_product_use_case() -> GetProductUseCase:
     return GetProductUseCase(uow_factory=_uow_factory)
+
+
+def get_get_product_by_slug_use_case() -> GetProductBySlugUseCase:
+    return GetProductBySlugUseCase(uow_factory=_uow_factory)
 
 
 def get_list_products_use_case() -> ListProductsUseCase:

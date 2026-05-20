@@ -46,9 +46,7 @@ def subscription(pubsub_topic):
     sub_path = f"projects/{PROJECT_ID}/subscriptions/{sub_id}"
     sub_client = SubscriberClient()
 
-    sub_client.create_subscription(
-        request={"name": sub_path, "topic": pubsub_topic}
-    )
+    sub_client.create_subscription(request={"name": sub_path, "topic": pubsub_topic})
     yield sub_path, sub_client
 
     try:

@@ -40,6 +40,11 @@ class FakeInventoryRepository:
     async def find_by_variant_id(self, variant_id: uuid.UUID) -> Inventory | None:
         return self._store.get(variant_id)
 
+    async def find_by_variant_ids(
+        self, variant_ids: list[uuid.UUID]
+    ) -> list[Inventory]:
+        return [self._store[vid] for vid in variant_ids if vid in self._store]
+
     async def add(self, *, variant_id: uuid.UUID) -> Inventory:
         inv = make_inventory(variant_id=variant_id, on_hand=0, reserved=0)
         self._store[variant_id] = inv

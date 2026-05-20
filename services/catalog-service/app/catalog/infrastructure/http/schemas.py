@@ -21,6 +21,8 @@ class ProductResponse(BaseModel):
     category_id: uuid.UUID
     status: ProductStatus
     created_by: uuid.UUID
+    slug: str
+    storefront_metadata: dict
     variants: list[ProductVariantResponse]
     created_at: datetime | None
     updated_at: datetime | None
@@ -30,12 +32,15 @@ class ProductCreate(BaseModel):
     name: str = Field(min_length=1, max_length=500)
     description: str | None = None
     category_id: uuid.UUID
+    slug: str = Field(min_length=1, max_length=200, pattern=r"^[a-z0-9-]+$")
+    storefront_metadata: dict = Field(default_factory=dict)
 
 
 class ProductUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=500)
     description: str | None = None
     category_id: uuid.UUID | None = None
+    storefront_metadata: dict | None = None
 
 
 class ProductStatusUpdate(BaseModel):

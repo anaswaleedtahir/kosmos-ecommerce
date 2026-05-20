@@ -15,6 +15,9 @@ from app.catalog.application.use_cases.create_product import CreateProductUseCas
 from app.catalog.application.use_cases.create_variant import CreateVariantUseCase
 from app.catalog.application.use_cases.delete_variant import DeleteVariantUseCase
 from app.catalog.application.use_cases.get_product import GetProductUseCase
+from app.catalog.application.use_cases.get_product_by_slug import (
+    GetProductBySlugUseCase,
+)
 from app.catalog.application.use_cases.list_categories import ListCategoriesUseCase
 from app.catalog.application.use_cases.list_products import ListProductsUseCase
 from app.catalog.application.use_cases.set_product_status import SetProductStatusUseCase
@@ -25,6 +28,7 @@ from app.catalog.infrastructure.composition import (
     get_create_product_use_case,
     get_create_variant_use_case,
     get_delete_variant_use_case,
+    get_get_product_by_slug_use_case,
     get_get_product_use_case,
     get_list_categories_use_case,
     get_list_products_use_case,
@@ -65,6 +69,15 @@ async def list_products(
     return [ProductResponse(**r.__dict__) for r in results]
 
 
+@router.get("/products/by-slug/{slug}", response_model=ProductResponse)
+async def get_product_by_slug(
+    slug: str,
+    use_case: GetProductBySlugUseCase = Depends(get_get_product_by_slug_use_case),
+) -> ProductResponse:
+    result = await use_case.execute(slug)
+    return ProductResponse(**result.__dict__)
+
+
 @router.get("/products/{product_id}", response_model=ProductResponse)
 async def get_product(
     product_id: uuid.UUID,
@@ -91,6 +104,8 @@ async def create_product(
             description=data.description,
             category_id=data.category_id,
             actor_id=_actor_id(payload),
+            slug=data.slug,
+            storefront_metadata=data.storefront_metadata,
         )
     )
     return ProductResponse(**result.__dict__)
@@ -110,6 +125,7 @@ async def update_product(
             description=data.description,
             category_id=data.category_id,
             actor_id=_actor_id(payload),
+            storefront_metadata=data.storefront_metadata,
         )
     )
     return ProductResponse(**result.__dict__)

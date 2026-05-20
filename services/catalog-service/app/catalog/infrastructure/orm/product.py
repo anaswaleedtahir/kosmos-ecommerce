@@ -39,11 +39,17 @@ class Product(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         server_default=ProductStatus.INACTIVE.value,
     )
     created_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    slug: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    storefront_metadata: Mapped[dict] = mapped_column(
+        JSONB, nullable=False, server_default="{}"
+    )
 
     category: Mapped[Category] = relationship("Category", back_populates="products")
     variants: Mapped[list["ProductVariant"]] = relationship(
         "ProductVariant", back_populates="product", cascade="all, delete-orphan"
     )
+
+    __table_args__ = (UniqueConstraint("slug", name="uq_products_slug"),)
 
 
 class ProductVariant(UUIDPrimaryKeyMixin, TimestampMixin, Base):

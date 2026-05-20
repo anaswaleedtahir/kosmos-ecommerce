@@ -1,4 +1,4 @@
-from app.catalog.application.dto import ProductResult, ProductVariantResult
+from app.catalog.application.dto import ProductResult, product_to_result
 from app.catalog.domain.ports.unit_of_work import CatalogUnitOfWorkFactory
 
 
@@ -10,26 +10,4 @@ class ListProductsUseCase:
         async with self._uow_factory() as uow:
             products = await uow.products.list_active(limit=limit, offset=offset)
 
-        return [
-            ProductResult(
-                id=p.id,
-                name=p.name,
-                description=p.description,
-                category_id=p.category_id,
-                status=p.status,
-                created_by=p.created_by,
-                variants=[
-                    ProductVariantResult(
-                        id=v.id,
-                        sku=v.sku,
-                        price=v.price,
-                        attributes=v.attributes,
-                        is_active=v.is_active,
-                    )
-                    for v in p.variants
-                ],
-                created_at=p.created_at,
-                updated_at=p.updated_at,
-            )
-            for p in products
-        ]
+        return [product_to_result(p) for p in products]

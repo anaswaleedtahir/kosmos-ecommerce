@@ -12,6 +12,8 @@ from app.catalog.infrastructure.repositories.mappers import (
     _variant_orm_to_domain,
 )
 
+_PRODUCT_OPTS = selectinload(ProductORM.variants)
+
 
 class SqlAlchemyProductRepository:
     def __init__(self, session: AsyncSession) -> None:
@@ -19,9 +21,14 @@ class SqlAlchemyProductRepository:
 
     async def find_by_id(self, id: uuid.UUID) -> Product | None:
         result = await self._session.execute(
-            select(ProductORM)
-            .where(ProductORM.id == id)
-            .options(selectinload(ProductORM.variants))
+            select(ProductORM).where(ProductORM.id == id).options(_PRODUCT_OPTS)
+        )
+        orm = result.scalar_one_or_none()
+        return _product_orm_to_domain(orm) if orm else None
+
+    async def find_by_slug(self, slug: str) -> Product | None:
+        result = await self._session.execute(
+            select(ProductORM).where(ProductORM.slug == slug).options(_PRODUCT_OPTS)
         )
         orm = result.scalar_one_or_none()
         return _product_orm_to_domain(orm) if orm else None
@@ -30,11 +37,17 @@ class SqlAlchemyProductRepository:
         result = await self._session.execute(
             select(ProductORM)
             .where(ProductORM.status == ProductStatus.ACTIVE)
-            .options(selectinload(ProductORM.variants))
+            .options(_PRODUCT_OPTS)
             .limit(limit)
             .offset(offset)
         )
         return [_product_orm_to_domain(row) for row in result.scalars().all()]
+
+    async def slug_exists(self, slug: str) -> bool:
+        result = await self._session.execute(
+            select(ProductORM.id).where(ProductORM.slug == slug)
+        )
+        return result.scalar_one_or_none() is not None
 
     async def add(
         self,
@@ -43,6 +56,8 @@ class SqlAlchemyProductRepository:
         description: str | None,
         category_id: uuid.UUID,
         created_by: uuid.UUID,
+        slug: str,
+        storefront_metadata: dict,
     ) -> Product:
         orm = ProductORM(
             name=name,
@@ -50,6 +65,8 @@ class SqlAlchemyProductRepository:
             category_id=category_id,
             status=ProductStatus.INACTIVE,
             created_by=created_by,
+            slug=slug,
+            storefront_metadata=storefront_metadata,
         )
         self._session.add(orm)
         await self._session.flush()
@@ -65,6 +82,7 @@ class SqlAlchemyProductRepository:
         orm.description = product.description
         orm.category_id = product.category_id
         orm.status = product.status
+        orm.storefront_metadata = product.storefront_metadata
         self._session.add(orm)
 
     async def add_variant(

@@ -7,7 +7,11 @@ from app.catalog.domain.entities.product import Product, ProductVariant
 class ProductRepository(Protocol):
     async def find_by_id(self, id: uuid.UUID) -> Product | None: ...
 
+    async def find_by_slug(self, slug: str) -> Product | None: ...
+
     async def list_active(self, limit: int, offset: int) -> list[Product]: ...
+
+    async def slug_exists(self, slug: str) -> bool: ...
 
     async def add(
         self,
@@ -16,6 +20,8 @@ class ProductRepository(Protocol):
         description: str | None,
         category_id: uuid.UUID,
         created_by: uuid.UUID,
+        slug: str,
+        storefront_metadata: dict,
     ) -> Product: ...
 
     async def save(self, product: Product) -> None: ...

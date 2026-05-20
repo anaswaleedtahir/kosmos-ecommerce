@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { IconSearch, IconX } from '@kosmos/design/icons';
 import { useUI } from './providers/UIProvider';
-import { getDefaultVariant, getProducts } from '@/lib/catalog';
+import { useProducts } from './providers/ProductsProvider';
+import { getDefaultVariant } from '@/lib/catalog';
 import { JOURNAL } from '@/lib/journal';
 import { eur } from '@/lib/format';
 
@@ -34,15 +35,16 @@ export function SearchOverlay() {
     return () => window.removeEventListener('keydown', onKey);
   }, [searchOpen, closeSearch]);
 
+  const products = useProducts();
   const results = useMemo(() => {
     const term = q.trim().toLowerCase();
     if (!term) return [];
-    return getProducts().filter((p) =>
+    return products.filter((p) =>
       `${p.name} ${p.family} ${p.tagline} ${p.cat}`
         .toLowerCase()
         .includes(term),
     );
-  }, [q]);
+  }, [q, products]);
 
   const journalPreview = JOURNAL.slice(0, 2);
 

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { CATEGORIES, getCategory, getProducts } from '@/lib/catalog';
+import { CATEGORIES, getCategory } from '@/lib/catalog';
+import { getProducts } from '@/lib/catalog-api';
 import { CollectionBody } from './CollectionBody';
 
 interface Params {
@@ -8,10 +9,6 @@ interface Params {
 
 const ALLOWED = new Set<string>(['all', ...CATEGORIES.map((c) => c.id)]);
 
-export function generateStaticParams() {
-  return ['all', ...CATEGORIES.map((c) => c.id)].map((cat) => ({ cat }));
-}
-
 export default async function CollectionPage({
   params,
 }: {
@@ -19,6 +16,10 @@ export default async function CollectionPage({
 }) {
   const { cat } = await params;
   if (!ALLOWED.has(cat)) notFound();
+
+  const allProducts = await getProducts();
+  const visibleCount =
+    cat === 'all' ? allProducts.length : allProducts.filter((p) => p.cat === cat).length;
 
   const meta = cat === 'all' ? null : getCategory(cat);
   const heading = meta?.label ?? 'The maison';
@@ -53,13 +54,13 @@ export default async function CollectionPage({
           </div>
           <div className="text-right">
             <div className="font-sans text-[11px] tracking-[0.22em] uppercase text-smoke mb-2">
-              {getProducts().filter((p) => cat === 'all' || p.cat === cat).length} pieces
+              {visibleCount} pieces
             </div>
           </div>
         </div>
       </section>
 
-      <CollectionBody key={cat} cat={cat} />
+      <CollectionBody key={cat} cat={cat} initialProducts={allProducts} />
     </div>
   );
 }

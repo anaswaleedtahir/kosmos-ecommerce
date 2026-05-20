@@ -31,6 +31,8 @@ class Product:
     category_id: uuid.UUID
     status: ProductStatus
     created_by: uuid.UUID
+    slug: str = ""
+    storefront_metadata: dict = field(default_factory=dict)
     variants: list[ProductVariant] = field(default_factory=list)
     created_at: datetime | None = None
     updated_at: datetime | None = None

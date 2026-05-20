@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { preconnect } from "react-dom";
 import { BagProvider } from "@/components/providers/BagProvider";
+import { ProductsProvider } from "@/components/providers/ProductsProvider";
 import { UIProvider } from "@/components/providers/UIProvider";
 import { AppHeader, AppFooter } from "@/components/AppShell";
 import { BagDrawer } from "@/components/BagDrawer";
 import { SearchOverlay } from "@/components/SearchOverlay";
 import { Toast } from "@/components/Toast";
+import { getProducts } from "@/lib/catalog-api";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,12 +19,13 @@ export const viewport: Viewport = {
   themeColor: "#E8E4D8",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   preconnect("https://images.unsplash.com");
   preconnect("https://fonts.googleapis.com");
   preconnect("https://fonts.gstatic.com", { crossOrigin: "anonymous" });
+  const products = await getProducts();
   return (
     <html lang="en" className="h-full">
       <body className="min-h-full flex flex-col bg-paper text-ink antialiased">
@@ -34,14 +37,16 @@ export default function RootLayout({
         </a>
         <BagProvider>
           <UIProvider>
-            <AppHeader />
-            <main id="main-content" className="flex-1">
-              {children}
-            </main>
-            <AppFooter />
-            <BagDrawer />
-            <SearchOverlay />
-            <Toast />
+            <ProductsProvider products={products}>
+              <AppHeader />
+              <main id="main-content" className="flex-1">
+                {children}
+              </main>
+              <AppFooter />
+              <BagDrawer />
+              <SearchOverlay />
+              <Toast />
+            </ProductsProvider>
           </UIProvider>
         </BagProvider>
       </body>

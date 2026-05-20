@@ -26,6 +26,8 @@ def _product_orm_to_domain(orm: ProductORM) -> Product:
         category_id=orm.category_id,
         status=orm.status,
         created_by=orm.created_by,
+        slug=orm.slug,
+        storefront_metadata=orm.storefront_metadata or {},
         variants=[_variant_orm_to_domain(v) for v in orm.variants],
         created_at=orm.created_at,
         updated_at=orm.updated_at,

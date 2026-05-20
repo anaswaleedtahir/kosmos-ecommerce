@@ -8,7 +8,7 @@ import { Btn } from '@kosmos/design/btn';
 import { IconX, IconMinus, IconPlus } from '@kosmos/design/icons';
 import { useBag } from './providers/BagProvider';
 import { useUI } from './providers/UIProvider';
-import { getProduct } from '@/lib/catalog';
+import { useProducts } from './providers/ProductsProvider';
 import { eur } from '@/lib/format';
 
 export function BagDrawer() {
@@ -33,9 +33,10 @@ export function BagDrawer() {
     return () => window.removeEventListener('keydown', onKey);
   }, [bagOpen, closeBag]);
 
+  const products = useProducts();
   const resolved = lines
     .map((b) => {
-      const p = getProduct(b.pid);
+      const p = products.find((x) => x.id === b.pid);
       const v = p?.variants.find((x) => x.id === b.vid);
       return p && v ? { ...b, p, v } : null;
     })

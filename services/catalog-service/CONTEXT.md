@@ -13,10 +13,12 @@
 ## Glossary
 
 ### Product
-A sellable item with metadata. Has a lifecycle status of `active` or `inactive`. Inactive products are hidden from the storefront. Belongs to exactly one `Category`. A `Product` is never directly purchasable — its `ProductVariant's` are.
+A sellable item with metadata. Has a lifecycle status of `active` or `inactive`. Inactive products are hidden from the storefront. Belongs to exactly one `Category`. A `Product` is never directly purchasable — its `ProductVariant`s are.
+
+Storefront-facing fields stored as first-class columns (not JSONB) so the BFF can query them without post-processing: `slug` (globally unique URL-safe identifier, e.g. `"noir-undone"`), `no` (display product number, e.g. `"N° 04"`), `tagline`, `image_url`, `image_url_2`, `image_url_3`, `family` (olfactory/product family label), `composer` (nullable, fragrance composer credit), `variant_label` (label shown above the variant selector, e.g. `"Volume"` or `"Shade"`), `variants_are_shades` (boolean — drives swatch rendering), `notes` (JSONB dict of free-form tasting/ingredient notes). See ADR-011.
 
 ### ProductVariant
-A specific, purchasable form of a `Product` (e.g. a T-shirt in size M / color red). Carries its own `sku`, `price`, and free-form `attributes` (JSONB). The variant is the unit that appears in a cart or order line item.
+A specific, purchasable form of a `Product` (e.g. a fragrance in 50 ml). Carries its own `sku`, `price`, `label` (display label shown in the selector, e.g. `"50 ml"` or `"Salon"`), `swatch` (nullable hex colour for shade variants), `is_default` (exactly one variant per product should be `True`), and free-form `attributes` (JSONB) for any remaining open-ended properties. The variant is the unit that appears in a cart or order line item. See ADR-011.
 
 ### Category
 A node in a single-parent taxonomy tree (`parent_id | None`). Depth is unbounded; recursive CTEs handle descendant queries. Each `Product` has exactly one primary `Category`.
@@ -79,6 +81,8 @@ Emitted by use cases via `uow.add_event(...)` to decouple mutation logic from au
 ## Key Invariants
 
 - A `ProductVariant` SKU is globally unique.
+- A `Product` slug is globally unique and URL-safe (`^[a-z0-9-]+$`). It is set on creation and never changed — changing a slug would break existing URLs and bookmarks.
+- Exactly one `ProductVariant` per `Product` has `is_default = True`. Use cases enforce this: setting a new default clears the flag on siblings.
 - `Inventory.quantity_reserved` never exceeds `quantity_on_hand`.
 - `ProductPublished` is emitted only on `inactive → active` transition, not on re-saves of already-active products.
 - Hard deletes are forbidden; use `Product.status = inactive` and `Inventory` quantity zeroing instead.
