@@ -27,16 +27,12 @@ _access_token_ttl = timedelta(minutes=settings.jwt_access_token_expire_minutes)
 _refresh_token_ttl = timedelta(days=settings.jwt_refresh_token_expire_days)
 
 
+_refresh_store = RedisRefreshTokenStore(redis_client)
+_revocation_store = RedisRevocationStore(redis_client)
+
+
 def _uow_factory() -> SqlAlchemyAuthUnitOfWork:
     return SqlAlchemyAuthUnitOfWork(async_session_factory)
-
-
-def _refresh_store() -> RedisRefreshTokenStore:
-    return RedisRefreshTokenStore(redis_client)
-
-
-def _revocation_store() -> RedisRevocationStore:
-    return RedisRevocationStore(redis_client)
 
 
 # ── Builders ─────────────────────────────────────────────────────────────────
@@ -55,7 +51,7 @@ def build_login_use_case() -> LoginUseCase:
         uow_factory=_uow_factory,
         hasher=_hasher,
         token_issuer=_token_issuer,
-        refresh_store=_refresh_store(),
+        refresh_store=_refresh_store,
         access_token_ttl=_access_token_ttl,
         refresh_token_ttl=_refresh_token_ttl,
     )
@@ -65,7 +61,7 @@ def build_refresh_token_use_case() -> RefreshTokenUseCase:
     return RefreshTokenUseCase(
         uow_factory=_uow_factory,
         token_issuer=_token_issuer,
-        refresh_store=_refresh_store(),
+        refresh_store=_refresh_store,
         access_token_ttl=_access_token_ttl,
         refresh_token_ttl=_refresh_token_ttl,
     )
@@ -73,8 +69,8 @@ def build_refresh_token_use_case() -> RefreshTokenUseCase:
 
 def build_logout_use_case() -> LogoutUseCase:
     return LogoutUseCase(
-        refresh_store=_refresh_store(),
-        revocation_store=_revocation_store(),
+        refresh_store=_refresh_store,
+        revocation_store=_revocation_store,
     )
 
 
@@ -83,7 +79,7 @@ def build_token_verifier() -> JwtTokenVerifier:
 
 
 def build_revocation_store() -> RedisRevocationStore:
-    return _revocation_store()
+    return _revocation_store
 
 
 # ── FastAPI Depends providers ─────────────────────────────────────────────────
