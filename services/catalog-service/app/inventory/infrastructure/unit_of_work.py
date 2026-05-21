@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.inventory.domain.entities.inventory import Inventory
@@ -5,12 +7,16 @@ from app.inventory.domain.events import InventoryEvent
 from app.inventory.infrastructure.repositories.sqlalchemy_inventory_repository import (
     SqlAlchemyInventoryRepository,
 )
-from app.shared.infrastructure.events.pubsub_publisher import publish_event
 
 
 class SqlAlchemyInventoryUnitOfWork:
-    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+    def __init__(
+        self,
+        session_factory: async_sessionmaker[AsyncSession],
+        dispatchers: list[Any] | None = None,
+    ) -> None:
         self._session_factory = session_factory
+        self._dispatchers = dispatchers or []
         self._events: list[InventoryEvent] = []
         self._tracked: list[Inventory] = []
 
@@ -34,8 +40,8 @@ class SqlAlchemyInventoryUnitOfWork:
             self._events.extend(entity.collect_events())
         self._tracked.clear()
         events = self.collect_events()
-        for event in events:
-            await publish_event(event.event_type, event.to_pubsub_payload())
+        for dispatcher in self._dispatchers:
+            await dispatcher.dispatch(events)
 
     async def rollback(self) -> None:
         await self._session.rollback()

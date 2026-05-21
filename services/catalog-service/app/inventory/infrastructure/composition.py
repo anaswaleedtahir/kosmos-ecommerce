@@ -9,10 +9,18 @@ from app.inventory.application.use_cases.reserve_stock import ReserveStockUseCas
 from app.inventory.application.use_cases.restock import RestockUseCase
 from app.inventory.infrastructure.unit_of_work import SqlAlchemyInventoryUnitOfWork
 from app.shared.infrastructure.db.session import async_session_factory
+from app.shared.infrastructure.events.pubsub_dispatcher import (
+    PostCommitPubSubDispatcher,
+)
+
+_pubsub_dispatcher = PostCommitPubSubDispatcher()
 
 
 def _uow_factory() -> SqlAlchemyInventoryUnitOfWork:
-    return SqlAlchemyInventoryUnitOfWork(session_factory=async_session_factory)
+    return SqlAlchemyInventoryUnitOfWork(
+        session_factory=async_session_factory,
+        dispatchers=[_pubsub_dispatcher],
+    )
 
 
 def get_get_inventory_use_case() -> GetInventoryUseCase:

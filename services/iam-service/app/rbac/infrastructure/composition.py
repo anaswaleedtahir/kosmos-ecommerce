@@ -9,14 +9,16 @@ from app.rbac.application.use_cases.revoke_role_from_user import (
 )
 from app.rbac.infrastructure.unit_of_work import SqlAlchemyRbacUnitOfWork
 from app.shared.infrastructure.db.session import async_session_factory
+from app.shared.infrastructure.events.audit_dispatcher import PostCommitAuditDispatcher
 
 
 def _uow_factory() -> SqlAlchemyRbacUnitOfWork:
-    """Factory for creating UoW instances. Injects SqlAlchemyAuditLogger so that
-    the UoW itself has no compile-time dependency on the Audit context."""
     return SqlAlchemyRbacUnitOfWork(
         session_factory=async_session_factory,
-        audit_logger_factory=SqlAlchemyAuditLogger,
+        dispatcher_factory=lambda session: PostCommitAuditDispatcher(
+            audit_logger=SqlAlchemyAuditLogger(session),
+            session=session,
+        ),
     )
 
 

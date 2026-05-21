@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.catalog.domain.events import CatalogEvent
@@ -7,12 +9,16 @@ from app.catalog.infrastructure.repositories.sqlalchemy_category_repository impo
 from app.catalog.infrastructure.repositories.sqlalchemy_product_repository import (
     SqlAlchemyProductRepository,
 )
-from app.shared.infrastructure.events.pubsub_publisher import publish_event
 
 
 class SqlAlchemyCatalogUnitOfWork:
-    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+    def __init__(
+        self,
+        session_factory: async_sessionmaker[AsyncSession],
+        dispatchers: list[Any] | None = None,
+    ) -> None:
         self._session_factory = session_factory
+        self._dispatchers = dispatchers or []
         self._events: list[CatalogEvent] = []
 
     async def __aenter__(self) -> "SqlAlchemyCatalogUnitOfWork":
@@ -30,8 +36,8 @@ class SqlAlchemyCatalogUnitOfWork:
     async def commit(self) -> None:
         await self._session.commit()
         events = self.collect_events()
-        for event in events:
-            await publish_event(event.event_type, event.to_pubsub_payload())
+        for dispatcher in self._dispatchers:
+            await dispatcher.dispatch(events)
 
     async def rollback(self) -> None:
         await self._session.rollback()

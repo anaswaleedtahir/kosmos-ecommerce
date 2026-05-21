@@ -13,10 +13,18 @@ from app.catalog.application.use_cases.update_product import UpdateProductUseCas
 from app.catalog.application.use_cases.update_variant import UpdateVariantUseCase
 from app.catalog.infrastructure.unit_of_work import SqlAlchemyCatalogUnitOfWork
 from app.shared.infrastructure.db.session import async_session_factory
+from app.shared.infrastructure.events.pubsub_dispatcher import (
+    PostCommitPubSubDispatcher,
+)
+
+_pubsub_dispatcher = PostCommitPubSubDispatcher()
 
 
 def _uow_factory() -> SqlAlchemyCatalogUnitOfWork:
-    return SqlAlchemyCatalogUnitOfWork(session_factory=async_session_factory)
+    return SqlAlchemyCatalogUnitOfWork(
+        session_factory=async_session_factory,
+        dispatchers=[_pubsub_dispatcher],
+    )
 
 
 def get_create_product_use_case() -> CreateProductUseCase:
