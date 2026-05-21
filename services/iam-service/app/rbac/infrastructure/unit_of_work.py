@@ -3,6 +3,10 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from app.rbac.domain.ports.assignment_repository import AssignmentRepository
+from app.rbac.domain.ports.permission_repository import PermissionRepository
+from app.rbac.domain.ports.role_repository import RoleRepository
+from app.rbac.domain.ports.user_reader import UserReader
 from app.rbac.infrastructure.repositories.sqlalchemy_assignment_repository import (
     SqlAlchemyAssignmentRepository,
 )
@@ -19,6 +23,10 @@ from app.shared.domain.events import DomainEvent
 
 
 class SqlAlchemyRbacUnitOfWork:
+    roles: RoleRepository
+    permissions: PermissionRepository
+    assignments: AssignmentRepository
+    users: UserReader
     def __init__(
         self,
         session_factory: async_sessionmaker[AsyncSession],

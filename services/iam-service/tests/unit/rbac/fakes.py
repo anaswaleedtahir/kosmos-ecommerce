@@ -1,9 +1,7 @@
 """In-memory fakes for all RBAC ports — use in unit tests."""
 
 import uuid
-from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any
 
 from app.rbac.domain.ports.user_reader import UserSummary
 from app.shared.domain.entities.permission import Permission
@@ -139,42 +137,6 @@ class FakeUserReader:
         return self._store.get(id)
 
 
-# ── Audit logger fake ─────────────────────────────────────────────────────────
-
-
-@dataclass
-class AuditEntry:
-    actor_id: uuid.UUID | None
-    action: str
-    entity_type: str
-    entity_id: uuid.UUID | None
-    payload: dict[str, Any] | None
-
-
-class FakeAuditLogger:
-    def __init__(self) -> None:
-        self.entries: list[AuditEntry] = []
-
-    async def log(
-        self,
-        *,
-        actor_id: uuid.UUID | None,
-        action: str,
-        entity_type: str,
-        entity_id: uuid.UUID | None,
-        payload: dict[str, Any] | None = None,
-    ) -> None:
-        self.entries.append(
-            AuditEntry(
-                actor_id=actor_id,
-                action=action,
-                entity_type=entity_type,
-                entity_id=entity_id,
-                payload=payload,
-            )
-        )
-
-
 # ── Unit of Work fake ─────────────────────────────────────────────────────────
 
 
@@ -185,52 +147,36 @@ class FakeRbacUnitOfWork:
         permissions: FakePermissionRepository | None = None,
         assignments: FakeAssignmentRepository | None = None,
         users: FakeUserReader | None = None,
-        audit_logger: FakeAuditLogger | None = None,
     ) -> None:
         self.roles = roles or FakeRoleRepository()
         self.permissions = permissions or FakePermissionRepository()
         self.assignments = assignments or FakeAssignmentRepository()
         self.users = users or FakeUserReader()
-        self.audit_logger = audit_logger or FakeAuditLogger()
         self.committed = False
-        self.rolled_back = False
-        self._pending_events: list[DomainEvent] = []
-        self.emitted_events: list[DomainEvent] = []  # Preserved for test inspection
+        self._events: list[DomainEvent] = []
+        self.emitted_events: list[DomainEvent] = []
 
     async def __aenter__(self) -> "FakeRbacUnitOfWork":
-        self._pending_events = []
+        self._events = []
         self.emitted_events = []
         return self
 
     async def __aexit__(self, exc_type: object, *args: object) -> None:
         if exc_type:
-            self.rolled_back = True
-            self._pending_events.clear()
+            self._events.clear()
 
     async def commit(self) -> None:
         self.committed = True
-        # Move pending events to emitted for test inspection
-        self.emitted_events.extend(self._pending_events)
-        self._pending_events.clear()
+        self.emitted_events.extend(self._events)
+        self._events.clear()
 
     async def rollback(self) -> None:
-        self.rolled_back = True
-        self._pending_events.clear()
+        self._events.clear()
 
     def add_event(self, event: DomainEvent) -> None:
-        """Add a domain event to be dispatched after commit."""
-        self._pending_events.append(event)
+        self._events.append(event)
 
     def collect_events(self) -> list[DomainEvent]:
-        """Collect all pending domain events and clear the queue."""
-        events = self._pending_events[:]
-        self._pending_events.clear()
+        events = self._events[:]
+        self._events.clear()
         return events
-
-    def get_emitted_events(self) -> list[DomainEvent]:
-        """Get all events that were emitted (committed)."""
-        return self.emitted_events[:]
-
-    def clear_emitted_events(self) -> None:
-        """Clear the emitted events history (useful in tests)."""
-        self.emitted_events.clear()
