@@ -2,9 +2,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.auth.infrastructure.repositories.mappers import _role_orm_to_domain
 from app.rbac.infrastructure.orm.role import Role as RoleORM
 from app.shared.domain.entities.role import Role
+from app.shared.infrastructure.mappers import _role_orm_to_domain
 
 
 class SqlAlchemyRoleRepository:
