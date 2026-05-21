@@ -1,6 +1,7 @@
 import json
 
-from fastapi import HTTPException, Request, status
+from fastapi import Request
+from shared.exceptions import RateLimitError
 
 from app.shared.infrastructure.cache.redis import redis_client
 
@@ -26,10 +27,8 @@ async def rate_limit_by_ip(request: Request) -> None:
         await redis_client.expire(redis_key, IP_WINDOW)
 
     if count > IP_MAX_ATTEMPTS:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Rate limit exceeded (IP). Try again later.",
-            headers={"Retry-After": str(IP_WINDOW)},
+        raise RateLimitError(
+            "Rate limit exceeded (IP). Try again later.", retry_after=IP_WINDOW
         )
 
 
@@ -53,8 +52,6 @@ async def rate_limit_by_email(request: Request) -> None:
         await redis_client.expire(redis_key, EMAIL_WINDOW)
 
     if count > EMAIL_MAX_ATTEMPTS:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Rate limit exceeded (EMAIL). Try again later.",
-            headers={"Retry-After": str(EMAIL_WINDOW)},
+        raise RateLimitError(
+            "Rate limit exceeded (EMAIL). Try again later.", retry_after=EMAIL_WINDOW
         )

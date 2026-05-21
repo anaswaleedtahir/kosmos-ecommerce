@@ -1,7 +1,7 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from fastapi import HTTPException
+from shared.exceptions import RateLimitError
 from starlette.requests import Request
 
 
@@ -24,11 +24,11 @@ async def test_ip_rate_limit_exceeded():
         mock_redis.incr = mock_incr
         mock_redis.expire = mock_expire
 
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(RateLimitError) as exc_info:
             await rate_limit_by_ip(mock_request)
 
         assert exc_info.value.status_code == 429
-        assert "Rate limit exceeded (IP)" in exc_info.value.detail
+        assert "Rate limit exceeded (IP)" in str(exc_info.value)
 
         mock_incr.assert_called_once()
 
@@ -72,11 +72,11 @@ async def test_email_rate_limit_exceeded():
         mock_redis.incr = mock_incr
         mock_redis.expire = mock_expire
 
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(RateLimitError) as exc_info:
             await rate_limit_by_email(mock_request)
 
         assert exc_info.value.status_code == 429
-        assert "Rate limit exceeded (EMAIL)" in exc_info.value.detail
+        assert "Rate limit exceeded (EMAIL)" in str(exc_info.value)
 
         mock_incr.assert_called_once()
 

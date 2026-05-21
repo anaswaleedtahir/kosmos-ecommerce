@@ -33,6 +33,14 @@ class ValidationError(DomainError):
     status_code: ClassVar[int] = 422
 
 
+class RateLimitError(DomainError):
+    status_code: ClassVar[int] = 429
+
+    def __init__(self, detail: str = "Rate limit exceeded.", *, retry_after: int) -> None:
+        super().__init__(detail)
+        self.headers = {"Retry-After": str(retry_after)}
+
+
 def register_domain_exception_handler(app: Starlette) -> None:
     async def _handler(request: Request, exc: Exception) -> Response:
         domain_exc = exc if isinstance(exc, DomainError) else DomainError(str(exc))
