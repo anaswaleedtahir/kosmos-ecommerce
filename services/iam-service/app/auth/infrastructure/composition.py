@@ -46,6 +46,7 @@ def build_signup_use_case() -> SignupUseCase:
     return SignupUseCase(
         uow_factory=_uow_factory,
         hasher=_hasher,
+        default_role_name=settings.default_signup_role,
     )
 
 

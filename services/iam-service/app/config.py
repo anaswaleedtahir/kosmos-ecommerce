@@ -86,6 +86,7 @@ class Settings(BaseSettings):
     # ──────────── SEED ──────────── #
     seed_admin_email: str | None = None
     seed_admin_password: str | None = None
+    default_signup_role: str = "viewer"
 
 
 settings = Settings()
