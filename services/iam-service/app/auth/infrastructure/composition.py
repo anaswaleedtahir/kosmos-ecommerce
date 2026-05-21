@@ -35,10 +35,10 @@ def _uow_factory() -> SqlAlchemyAuthUnitOfWork:
     return SqlAlchemyAuthUnitOfWork(async_session_factory)
 
 
-# ── Builders ─────────────────────────────────────────────────────────────────
+# ── FastAPI Depends providers ─────────────────────────────────────────────────
 
 
-def build_signup_use_case() -> SignupUseCase:
+def get_signup_use_case() -> SignupUseCase:
     return SignupUseCase(
         uow_factory=_uow_factory,
         hasher=_hasher,
@@ -46,7 +46,7 @@ def build_signup_use_case() -> SignupUseCase:
     )
 
 
-def build_login_use_case() -> LoginUseCase:
+def get_login_use_case() -> LoginUseCase:
     return LoginUseCase(
         uow_factory=_uow_factory,
         hasher=_hasher,
@@ -57,7 +57,7 @@ def build_login_use_case() -> LoginUseCase:
     )
 
 
-def build_refresh_token_use_case() -> RefreshTokenUseCase:
+def get_refresh_token_use_case() -> RefreshTokenUseCase:
     return RefreshTokenUseCase(
         uow_factory=_uow_factory,
         token_issuer=_token_issuer,
@@ -67,43 +67,16 @@ def build_refresh_token_use_case() -> RefreshTokenUseCase:
     )
 
 
-def build_logout_use_case() -> LogoutUseCase:
+def get_logout_use_case() -> LogoutUseCase:
     return LogoutUseCase(
         refresh_store=_refresh_store,
         revocation_store=_revocation_store,
     )
 
 
-def build_token_verifier() -> JwtTokenVerifier:
+def get_token_verifier() -> JwtTokenVerifier:
     return _token_verifier
 
 
-def build_revocation_store() -> RedisRevocationStore:
-    return _revocation_store
-
-
-# ── FastAPI Depends providers ─────────────────────────────────────────────────
-
-
-def get_signup_use_case() -> SignupUseCase:
-    return build_signup_use_case()
-
-
-def get_login_use_case() -> LoginUseCase:
-    return build_login_use_case()
-
-
-def get_refresh_token_use_case() -> RefreshTokenUseCase:
-    return build_refresh_token_use_case()
-
-
-def get_logout_use_case() -> LogoutUseCase:
-    return build_logout_use_case()
-
-
-def get_token_verifier() -> JwtTokenVerifier:
-    return build_token_verifier()
-
-
 def get_revocation_store() -> RedisRevocationStore:
-    return build_revocation_store()
+    return _revocation_store
