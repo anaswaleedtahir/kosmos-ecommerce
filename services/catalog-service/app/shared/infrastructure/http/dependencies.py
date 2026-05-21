@@ -1,5 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from shared.actor import ActorContext
 
 from app.shared.infrastructure.http.jwks import jwks_client
 
@@ -29,3 +30,9 @@ async def require_catalog_write(
             detail="catalog:write permission required",
         )
     return payload
+
+
+async def get_actor_context(
+    payload: dict = Depends(require_catalog_write),
+) -> ActorContext:
+    return ActorContext.from_jwt(payload)

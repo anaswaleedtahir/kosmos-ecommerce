@@ -1,13 +1,15 @@
 import uuid
 from dataclasses import dataclass, field
 
+from shared.actor import ActorContext
+
 
 @dataclass
 class CreateProductInput:
     name: str
     description: str | None
     category_id: uuid.UUID
-    actor_id: uuid.UUID
+    actor: ActorContext
     slug: str = ""
     storefront_metadata: dict = field(default_factory=dict)
 
@@ -18,7 +20,7 @@ class UpdateProductInput:
     name: str | None
     description: str | None
     category_id: uuid.UUID | None
-    actor_id: uuid.UUID
+    actor: ActorContext
     storefront_metadata: dict | None = None
 
 
@@ -26,7 +28,7 @@ class UpdateProductInput:
 class SetProductStatusInput:
     product_id: uuid.UUID
     active: bool
-    actor_id: uuid.UUID
+    actor: ActorContext
 
 
 @dataclass
@@ -35,7 +37,7 @@ class CreateVariantInput:
     sku: str
     price: float
     attributes: dict
-    actor_id: uuid.UUID
+    actor: ActorContext
 
 
 @dataclass
@@ -44,7 +46,7 @@ class UpdateVariantInput:
     price: float | None
     attributes: dict | None
     is_active: bool | None
-    actor_id: uuid.UUID
+    actor: ActorContext
 
 
 @dataclass
@@ -52,4 +54,4 @@ class CreateCategoryInput:
     name: str
     slug: str
     parent_id: uuid.UUID | None
-    actor_id: uuid.UUID
+    actor: ActorContext

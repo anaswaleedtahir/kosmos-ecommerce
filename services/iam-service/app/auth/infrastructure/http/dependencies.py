@@ -1,5 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from shared.actor import ActorContext
 
 from app.auth.domain.exceptions import TokenRevokedError
 from app.auth.domain.ports.token_verifier import TokenPayload
@@ -32,3 +33,9 @@ async def require_super_user(
             detail="Access denied. Super user privileges required.",
         )
     return payload
+
+
+async def get_actor_context(
+    payload: TokenPayload = Depends(require_super_user),
+) -> ActorContext:
+    return ActorContext.from_jwt(dict(payload))

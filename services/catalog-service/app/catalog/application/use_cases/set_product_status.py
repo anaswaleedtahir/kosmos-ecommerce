@@ -20,7 +20,7 @@ class SetProductStatusUseCase:
                 if newly_activated:
                     uow.add_event(
                         ProductPublished(
-                            actor_id=input.actor_id,
+                            actor_id=input.actor.actor_id,
                             product_id=product.id,
                             name=product.name,
                             category_id=product.category_id,

@@ -23,7 +23,7 @@ class UpdateVariantUseCase:
 
             if input.price is not None:
                 event = product.update_variant_price(
-                    variant, input.price, actor_id=input.actor_id
+                    variant, input.price, actor_id=input.actor.actor_id
                 )
                 if event:
                     uow.add_event(event)

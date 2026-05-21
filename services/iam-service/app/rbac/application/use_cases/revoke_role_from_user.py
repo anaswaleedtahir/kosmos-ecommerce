@@ -25,7 +25,7 @@ class RevokeRoleFromUserUseCase:
             # Emit domain event for audit logging (decoupled via UoW)
             uow.add_event(
                 UserRoleRevoked(
-                    actor_id=input.actor_id,
+                    actor_id=input.actor.actor_id,
                     user_id=user.id,
                     user_email=user.email,
                     role_id=role.id,

@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from shared.actor import ActorContext
 
 from app.inventory.application.dto import RestockInput
 from app.inventory.application.use_cases.restock import RestockUseCase
@@ -27,7 +28,7 @@ async def test_restock_emits_restocked_when_inventory_was_depleted(depleted_inve
         RestockInput(
             variant_id=depleted_inventory.variant_id,
             quantity=10,
-            actor_id=uuid.uuid4(),
+            actor=ActorContext(actor_id=uuid.uuid4()),
         )
     )
 
@@ -46,7 +47,7 @@ async def test_restock_does_not_emit_when_already_in_stock():
         RestockInput(
             variant_id=in_stock.variant_id,
             quantity=3,
-            actor_id=uuid.uuid4(),
+            actor=ActorContext(actor_id=uuid.uuid4()),
         )
     )
 
@@ -59,7 +60,9 @@ async def test_restock_creates_inventory_when_missing():
     use_case = RestockUseCase(uow_factory=lambda: uow)
 
     result = await use_case.execute(
-        RestockInput(variant_id=variant_id, quantity=4, actor_id=uuid.uuid4())
+        RestockInput(
+            variant_id=variant_id, quantity=4, actor=ActorContext(actor_id=uuid.uuid4())
+        )
     )
 
     assert result.quantity_on_hand == 4

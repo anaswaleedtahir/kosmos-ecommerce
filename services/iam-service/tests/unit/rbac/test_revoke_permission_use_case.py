@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from shared.actor import ActorContext
 
 from app.rbac.application.dto import RevokePermissionInput
 from app.rbac.application.use_cases.revoke_permission import RevokePermissionUseCase
@@ -36,7 +37,9 @@ async def test_revoke_permission_success():
 
     await use_case.execute(
         RevokePermissionInput(
-            role_id=role.id, scope_key="reports:read", actor_id=uuid.uuid4()
+            role_id=role.id,
+            scope_key="reports:read",
+            actor=ActorContext(actor_id=uuid.uuid4()),
         )
     )
 
@@ -55,7 +58,9 @@ async def test_revoke_permission_emits_domain_event():
 
     await use_case.execute(
         RevokePermissionInput(
-            role_id=role.id, scope_key="reports:read", actor_id=uuid.uuid4()
+            role_id=role.id,
+            scope_key="reports:read",
+            actor=ActorContext(actor_id=uuid.uuid4()),
         )
     )
 
@@ -73,7 +78,9 @@ async def test_revoke_permission_raises_when_role_not_found():
     with pytest.raises(RoleNotFoundError):
         await use_case.execute(
             RevokePermissionInput(
-                role_id=uuid.uuid4(), scope_key="reports:read", actor_id=uuid.uuid4()
+                role_id=uuid.uuid4(),
+                scope_key="reports:read",
+                actor=ActorContext(actor_id=uuid.uuid4()),
             )
         )
 
@@ -86,6 +93,8 @@ async def test_revoke_permission_raises_when_permission_not_found():
     with pytest.raises(PermissionNotFoundError):
         await use_case.execute(
             RevokePermissionInput(
-                role_id=role.id, scope_key="nonexistent:action", actor_id=uuid.uuid4()
+                role_id=role.id,
+                scope_key="nonexistent:action",
+                actor=ActorContext(actor_id=uuid.uuid4()),
             )
         )

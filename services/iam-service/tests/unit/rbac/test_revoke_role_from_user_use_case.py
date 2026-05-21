@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from shared.actor import ActorContext
 
 from app.rbac.application.dto import RevokeRoleFromUserInput
 from app.rbac.application.use_cases.revoke_role_from_user import (
@@ -37,7 +38,9 @@ async def test_revoke_role_from_user_success():
     use_case = _make_use_case(uow)
 
     await use_case.execute(
-        RevokeRoleFromUserInput(user_id=user.id, role_id=role.id, actor_id=uuid.uuid4())
+        RevokeRoleFromUserInput(
+            user_id=user.id, role_id=role.id, actor=ActorContext(actor_id=uuid.uuid4())
+        )
     )
 
     assert (user.id, role.id) not in assignments._user_roles
@@ -54,7 +57,9 @@ async def test_revoke_role_from_user_emits_domain_event():
     use_case = _make_use_case(uow)
 
     await use_case.execute(
-        RevokeRoleFromUserInput(user_id=user.id, role_id=role.id, actor_id=uuid.uuid4())
+        RevokeRoleFromUserInput(
+            user_id=user.id, role_id=role.id, actor=ActorContext(actor_id=uuid.uuid4())
+        )
     )
 
     events = uow.emitted_events
@@ -73,7 +78,9 @@ async def test_revoke_role_raises_when_user_not_found():
     with pytest.raises(UserNotFoundError):
         await use_case.execute(
             RevokeRoleFromUserInput(
-                user_id=uuid.uuid4(), role_id=role.id, actor_id=uuid.uuid4()
+                user_id=uuid.uuid4(),
+                role_id=role.id,
+                actor=ActorContext(actor_id=uuid.uuid4()),
             )
         )
 
@@ -86,6 +93,8 @@ async def test_revoke_role_raises_when_role_not_found():
     with pytest.raises(RoleNotFoundError):
         await use_case.execute(
             RevokeRoleFromUserInput(
-                user_id=user.id, role_id=uuid.uuid4(), actor_id=uuid.uuid4()
+                user_id=user.id,
+                role_id=uuid.uuid4(),
+                actor=ActorContext(actor_id=uuid.uuid4()),
             )
         )

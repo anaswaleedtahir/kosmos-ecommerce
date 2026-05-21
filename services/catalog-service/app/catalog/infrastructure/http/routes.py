@@ -1,6 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, status
+from shared.actor import ActorContext
 
 from app.catalog.application.dto import (
     CreateCategoryInput,
@@ -47,13 +48,9 @@ from app.catalog.infrastructure.http.schemas import (
     VariantCreate,
     VariantUpdate,
 )
-from app.shared.infrastructure.http.dependencies import require_catalog_write
+from app.shared.infrastructure.http.dependencies import get_actor_context
 
 router = APIRouter(prefix="/catalog", tags=["catalog"])
-
-
-def _actor_id(payload: dict) -> uuid.UUID:
-    return uuid.UUID(str(payload["sub"]))
 
 
 # ── Products (public reads) ─────────────────────────────────────────────────
@@ -95,7 +92,7 @@ async def get_product(
 )
 async def create_product(
     data: ProductCreate,
-    payload: dict = Depends(require_catalog_write),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: CreateProductUseCase = Depends(get_create_product_use_case),
 ) -> ProductResponse:
     result = await use_case.execute(
@@ -103,7 +100,7 @@ async def create_product(
             name=data.name,
             description=data.description,
             category_id=data.category_id,
-            actor_id=_actor_id(payload),
+            actor=actor,
             slug=data.slug,
             storefront_metadata=data.storefront_metadata,
         )
@@ -115,7 +112,7 @@ async def create_product(
 async def update_product(
     product_id: uuid.UUID,
     data: ProductUpdate,
-    payload: dict = Depends(require_catalog_write),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: UpdateProductUseCase = Depends(get_update_product_use_case),
 ) -> ProductResponse:
     result = await use_case.execute(
@@ -124,7 +121,7 @@ async def update_product(
             name=data.name,
             description=data.description,
             category_id=data.category_id,
-            actor_id=_actor_id(payload),
+            actor=actor,
             storefront_metadata=data.storefront_metadata,
         )
     )
@@ -135,15 +132,11 @@ async def update_product(
 async def set_product_status(
     product_id: uuid.UUID,
     data: ProductStatusUpdate,
-    payload: dict = Depends(require_catalog_write),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: SetProductStatusUseCase = Depends(get_set_product_status_use_case),
 ) -> ProductResponse:
     result = await use_case.execute(
-        SetProductStatusInput(
-            product_id=product_id,
-            active=data.active,
-            actor_id=_actor_id(payload),
-        )
+        SetProductStatusInput(product_id=product_id, active=data.active, actor=actor)
     )
     return ProductResponse.model_validate(result)
 
@@ -159,7 +152,7 @@ async def set_product_status(
 async def create_variant(
     product_id: uuid.UUID,
     data: VariantCreate,
-    payload: dict = Depends(require_catalog_write),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: CreateVariantUseCase = Depends(get_create_variant_use_case),
 ) -> ProductVariantResponse:
     result = await use_case.execute(
@@ -168,7 +161,7 @@ async def create_variant(
             sku=data.sku,
             price=data.price,
             attributes=data.attributes,
-            actor_id=_actor_id(payload),
+            actor=actor,
         )
     )
     return ProductVariantResponse.model_validate(result)
@@ -178,7 +171,7 @@ async def create_variant(
 async def update_variant(
     variant_id: uuid.UUID,
     data: VariantUpdate,
-    payload: dict = Depends(require_catalog_write),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: UpdateVariantUseCase = Depends(get_update_variant_use_case),
 ) -> ProductVariantResponse:
     result = await use_case.execute(
@@ -187,7 +180,7 @@ async def update_variant(
             price=data.price,
             attributes=data.attributes,
             is_active=data.is_active,
-            actor_id=_actor_id(payload),
+            actor=actor,
         )
     )
     return ProductVariantResponse.model_validate(result)
@@ -196,7 +189,7 @@ async def update_variant(
 @router.delete("/variants/{variant_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_variant(
     variant_id: uuid.UUID,
-    payload: dict = Depends(require_catalog_write),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: DeleteVariantUseCase = Depends(get_delete_variant_use_case),
 ) -> None:
     await use_case.execute(variant_id)
@@ -218,15 +211,12 @@ async def list_categories(
 )
 async def create_category(
     data: CategoryCreate,
-    payload: dict = Depends(require_catalog_write),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: CreateCategoryUseCase = Depends(get_create_category_use_case),
 ) -> CategoryResponse:
     result = await use_case.execute(
         CreateCategoryInput(
-            name=data.name,
-            slug=data.slug,
-            parent_id=data.parent_id,
-            actor_id=_actor_id(payload),
+            name=data.name, slug=data.slug, parent_id=data.parent_id, actor=actor
         )
     )
     return CategoryResponse.model_validate(result)

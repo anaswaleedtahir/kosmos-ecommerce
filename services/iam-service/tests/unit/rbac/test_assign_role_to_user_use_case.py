@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from shared.actor import ActorContext
 
 from app.rbac.application.dto import AssignRoleToUserInput
 from app.rbac.application.use_cases.assign_role_to_user import AssignRoleToUserUseCase
@@ -29,7 +30,9 @@ async def test_assign_role_to_user_success():
     use_case = _make_use_case(uow)
 
     result = await use_case.execute(
-        AssignRoleToUserInput(user_id=user.id, role_id=role.id, actor_id=uuid.uuid4())
+        AssignRoleToUserInput(
+            user_id=user.id, role_id=role.id, actor=ActorContext(actor_id=uuid.uuid4())
+        )
     )
 
     assert result.user_id == user.id
@@ -49,7 +52,9 @@ async def test_assign_role_to_user_emits_domain_event():
     use_case = _make_use_case(uow)
 
     await use_case.execute(
-        AssignRoleToUserInput(user_id=user.id, role_id=role.id, actor_id=uuid.uuid4())
+        AssignRoleToUserInput(
+            user_id=user.id, role_id=role.id, actor=ActorContext(actor_id=uuid.uuid4())
+        )
     )
 
     events = uow.emitted_events
@@ -68,7 +73,9 @@ async def test_assign_role_raises_when_user_not_found():
     with pytest.raises(UserNotFoundError):
         await use_case.execute(
             AssignRoleToUserInput(
-                user_id=uuid.uuid4(), role_id=role.id, actor_id=uuid.uuid4()
+                user_id=uuid.uuid4(),
+                role_id=role.id,
+                actor=ActorContext(actor_id=uuid.uuid4()),
             )
         )
 
@@ -81,6 +88,8 @@ async def test_assign_role_raises_when_role_not_found():
     with pytest.raises(RoleNotFoundError):
         await use_case.execute(
             AssignRoleToUserInput(
-                user_id=user.id, role_id=uuid.uuid4(), actor_id=uuid.uuid4()
+                user_id=user.id,
+                role_id=uuid.uuid4(),
+                actor=ActorContext(actor_id=uuid.uuid4()),
             )
         )

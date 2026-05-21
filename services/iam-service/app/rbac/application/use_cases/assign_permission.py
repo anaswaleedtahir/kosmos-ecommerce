@@ -29,13 +29,13 @@ class AssignPermissionUseCase:
             await uow.assignments.assign_permission(
                 role_id=role.id,
                 permission_id=permission.id,
-                granted_by=input.actor_id,
+                granted_by=input.actor.actor_id,
             )
 
             # Emit domain event for audit logging (decoupled via UoW)
             uow.add_event(
                 PermissionGranted(
-                    actor_id=input.actor_id,
+                    actor_id=input.actor.actor_id,
                     role_id=role.id,
                     role_name=role.name,
                     permission_id=permission.id,

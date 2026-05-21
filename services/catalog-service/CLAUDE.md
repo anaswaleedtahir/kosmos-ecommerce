@@ -86,7 +86,7 @@ All events implement `to_pubsub_payload() -> dict` and expose `event_type` (clas
 - **Reads** — public, no token required
 - **Mutations** — `require_catalog_write` dependency in `app/catalog/infrastructure/http/dependencies.py` verifies the RS256 JWT and checks for the `catalog:write` permission claim
 - `JwksClient` fetches `GET /.well-known/jwks.json` from iam-service (configured via `IAM_JWKS_URL`) at startup via `app.lifespan`. In tests, `jwks_client._public_key` is patched with a `MagicMock` to bypass verification.
-- JWT payload extracted via `payload["sub"]` for `actor_id` in all write routes
+- Write routes take `actor: ActorContext = Depends(get_actor_context)` — see `app/shared/infrastructure/http/dependencies.py`. `get_actor_context` chains off `require_catalog_write` and returns a `shared.actor.ActorContext` built from the verified JWT. Use cases consume `input.actor.actor_id`; raw `payload["sub"]` extraction is forbidden in routes.
 
 ### API surface
 

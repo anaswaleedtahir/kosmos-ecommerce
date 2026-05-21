@@ -1,9 +1,9 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
+from shared.actor import ActorContext
 
-from app.auth.domain.ports.token_verifier import TokenPayload
-from app.auth.infrastructure.http.dependencies import require_super_user
+from app.auth.infrastructure.http.dependencies import get_actor_context
 from app.rbac.application.dto import (
     AssignPermissionInput,
     AssignRoleToUserInput,
@@ -40,22 +40,14 @@ from app.rbac.infrastructure.http.schemas import (
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
-def _actor_id(payload: TokenPayload) -> UUID:
-    return UUID(str(payload["sub"]))
-
-
 @router.post("/roles", response_model=RoleResponse, status_code=status.HTTP_201_CREATED)
 async def create_role(
     data: RoleCreate,
-    payload: TokenPayload = Depends(require_super_user),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: CreateRoleUseCase = Depends(get_create_role_use_case),
 ) -> RoleResponse:
     result = await use_case.execute(
-        CreateRoleInput(
-            name=data.name,
-            description=data.description,
-            actor_id=_actor_id(payload),
-        )
+        CreateRoleInput(name=data.name, description=data.description, actor=actor)
     )
     return RoleResponse(
         id=result.id,
@@ -70,12 +62,10 @@ async def create_role(
 @router.delete("/roles/{role_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_role(
     role_id: UUID,
-    payload: TokenPayload = Depends(require_super_user),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: DeleteRoleUseCase = Depends(get_delete_role_use_case),
 ) -> None:
-    await use_case.execute(
-        DeleteRoleInput(role_id=role_id, actor_id=_actor_id(payload))
-    )
+    await use_case.execute(DeleteRoleInput(role_id=role_id, actor=actor))
 
 
 @router.post(
@@ -86,7 +76,7 @@ async def delete_role(
 async def assign_permission(
     role_id: UUID,
     data: PermissionCreate,
-    payload: TokenPayload = Depends(require_super_user),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: AssignPermissionUseCase = Depends(get_assign_permission_use_case),
 ) -> RolePermissionResponse:
     result = await use_case.execute(
@@ -94,7 +84,7 @@ async def assign_permission(
             role_id=role_id,
             resource=data.resource,
             action=data.action,
-            actor_id=_actor_id(payload),
+            actor=actor,
         )
     )
     return RolePermissionResponse(
@@ -108,15 +98,11 @@ async def assign_permission(
 async def revoke_permission(
     role_id: UUID,
     scope: str,
-    payload: TokenPayload = Depends(require_super_user),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: RevokePermissionUseCase = Depends(get_revoke_permission_use_case),
 ) -> None:
     await use_case.execute(
-        RevokePermissionInput(
-            role_id=role_id,
-            scope_key=scope,
-            actor_id=_actor_id(payload),
-        )
+        RevokePermissionInput(role_id=role_id, scope_key=scope, actor=actor)
     )
 
 
@@ -128,15 +114,11 @@ async def revoke_permission(
 async def assign_role_to_user(
     user_id: UUID,
     data: AssignRoleRequest,
-    payload: TokenPayload = Depends(require_super_user),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: AssignRoleToUserUseCase = Depends(get_assign_role_to_user_use_case),
 ) -> UserRoleResponse:
     result = await use_case.execute(
-        AssignRoleToUserInput(
-            user_id=user_id,
-            role_id=data.role_id,
-            actor_id=_actor_id(payload),
-        )
+        AssignRoleToUserInput(user_id=user_id, role_id=data.role_id, actor=actor)
     )
     return UserRoleResponse(user_id=result.user_id, role_id=result.role_id)
 
@@ -147,13 +129,9 @@ async def assign_role_to_user(
 async def revoke_role_from_user(
     user_id: UUID,
     role_id: UUID,
-    payload: TokenPayload = Depends(require_super_user),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: RevokeRoleFromUserUseCase = Depends(get_revoke_role_from_user_use_case),
 ) -> None:
     await use_case.execute(
-        RevokeRoleFromUserInput(
-            user_id=user_id,
-            role_id=role_id,
-            actor_id=_actor_id(payload),
-        )
+        RevokeRoleFromUserInput(user_id=user_id, role_id=role_id, actor=actor)
     )

@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from shared.actor import ActorContext
 
 from app.rbac.application.dto import DeleteRoleInput
 from app.rbac.application.use_cases.delete_role import DeleteRoleUseCase
@@ -19,7 +20,9 @@ async def test_delete_role_success():
     uow = FakeRbacUnitOfWork(roles=FakeRoleRepository([role]))
     use_case = _make_use_case(uow)
 
-    await use_case.execute(DeleteRoleInput(role_id=role.id, actor_id=uuid.uuid4()))
+    await use_case.execute(
+        DeleteRoleInput(role_id=role.id, actor=ActorContext(actor_id=uuid.uuid4()))
+    )
 
     stored = await uow.roles.find_by_id(role.id)
     assert stored is not None
@@ -33,7 +36,9 @@ async def test_delete_role_emits_domain_event():
     uow = FakeRbacUnitOfWork(roles=FakeRoleRepository([role]))
     use_case = _make_use_case(uow)
 
-    await use_case.execute(DeleteRoleInput(role_id=role.id, actor_id=uuid.uuid4()))
+    await use_case.execute(
+        DeleteRoleInput(role_id=role.id, actor=ActorContext(actor_id=uuid.uuid4()))
+    )
 
     events = uow.emitted_events
     assert len(events) == 1
@@ -48,7 +53,9 @@ async def test_delete_role_raises_when_not_found():
 
     with pytest.raises(RoleNotFoundError):
         await use_case.execute(
-            DeleteRoleInput(role_id=uuid.uuid4(), actor_id=uuid.uuid4())
+            DeleteRoleInput(
+                role_id=uuid.uuid4(), actor=ActorContext(actor_id=uuid.uuid4())
+            )
         )
 
 
@@ -58,6 +65,8 @@ async def test_delete_role_raises_for_system_role():
     use_case = _make_use_case(uow)
 
     with pytest.raises(SystemRoleProtectedError):
-        await use_case.execute(DeleteRoleInput(role_id=role.id, actor_id=uuid.uuid4()))
+        await use_case.execute(
+            DeleteRoleInput(role_id=role.id, actor=ActorContext(actor_id=uuid.uuid4()))
+        )
 
     assert uow.committed is False

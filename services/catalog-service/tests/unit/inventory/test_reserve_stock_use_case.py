@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from shared.actor import ActorContext
 
 from app.inventory.application.dto import ReserveStockInput
 from app.inventory.application.use_cases.reserve_stock import ReserveStockUseCase
@@ -34,7 +35,7 @@ async def test_reserves_stock_successfully(uow, inventory):
         ReserveStockInput(
             variant_id=inventory.variant_id,
             quantity=3,
-            actor_id=uuid.uuid4(),
+            actor=ActorContext(actor_id=uuid.uuid4()),
         )
     )
 
@@ -52,7 +53,7 @@ async def test_reserving_all_available_does_not_emit_depleted(uow, inventory):
         ReserveStockInput(
             variant_id=inventory.variant_id,
             quantity=5,
-            actor_id=uuid.uuid4(),
+            actor=ActorContext(actor_id=uuid.uuid4()),
         )
     )
 
@@ -67,7 +68,7 @@ async def test_raises_when_insufficient_stock(uow, inventory):
             ReserveStockInput(
                 variant_id=inventory.variant_id,
                 quantity=10,
-                actor_id=uuid.uuid4(),
+                actor=ActorContext(actor_id=uuid.uuid4()),
             )
         )
 
@@ -84,6 +85,6 @@ async def test_raises_when_inventory_not_found():
             ReserveStockInput(
                 variant_id=uuid.uuid4(),
                 quantity=1,
-                actor_id=uuid.uuid4(),
+                actor=ActorContext(actor_id=uuid.uuid4()),
             )
         )

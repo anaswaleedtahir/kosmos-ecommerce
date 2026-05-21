@@ -12,7 +12,7 @@ class RestockUseCase:
             if not inv:
                 inv = await uow.inventory.add(variant_id=input.variant_id)
 
-            inv.restock(input.quantity, actor_id=input.actor_id)
+            inv.restock(input.quantity, actor_id=input.actor.actor_id)
             await uow.inventory.save(inv)
             await uow.commit()
 

@@ -2,12 +2,14 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime
 
+from shared.actor import ActorContext
+
 
 @dataclass
 class CreateRoleInput:
     name: str
     description: str | None
-    actor_id: uuid.UUID
+    actor: ActorContext
 
 
 @dataclass
@@ -23,7 +25,7 @@ class CreateRoleResult:
 @dataclass
 class DeleteRoleInput:
     role_id: uuid.UUID
-    actor_id: uuid.UUID
+    actor: ActorContext
 
 
 @dataclass
@@ -31,7 +33,7 @@ class AssignPermissionInput:
     role_id: uuid.UUID
     resource: str
     action: str
-    actor_id: uuid.UUID
+    actor: ActorContext
 
 
 @dataclass
@@ -44,14 +46,14 @@ class AssignPermissionResult:
 class RevokePermissionInput:
     role_id: uuid.UUID
     scope_key: str
-    actor_id: uuid.UUID
+    actor: ActorContext
 
 
 @dataclass
 class AssignRoleToUserInput:
     user_id: uuid.UUID
     role_id: uuid.UUID
-    actor_id: uuid.UUID
+    actor: ActorContext
 
 
 @dataclass
@@ -64,4 +66,4 @@ class AssignRoleToUserResult:
 class RevokeRoleFromUserInput:
     user_id: uuid.UUID
     role_id: uuid.UUID
-    actor_id: uuid.UUID
+    actor: ActorContext

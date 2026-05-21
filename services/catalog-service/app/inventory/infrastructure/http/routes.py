@@ -1,6 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, Query, status
+from shared.actor import ActorContext
 
 from app.inventory.application.dto import (
     ReleaseReservationInput,
@@ -30,7 +31,7 @@ from app.inventory.infrastructure.http.schemas import (
     ReserveRequest,
     RestockRequest,
 )
-from app.shared.infrastructure.http.dependencies import require_catalog_write
+from app.shared.infrastructure.http.dependencies import get_actor_context
 
 router = APIRouter(prefix="/inventory", tags=["inventory"])
 
@@ -63,15 +64,11 @@ async def get_inventory(
 async def restock(
     variant_id: uuid.UUID,
     data: RestockRequest,
-    payload: dict = Depends(require_catalog_write),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: RestockUseCase = Depends(get_restock_use_case),
 ) -> InventoryResponse:
     result = await use_case.execute(
-        RestockInput(
-            variant_id=variant_id,
-            quantity=data.quantity,
-            actor_id=uuid.UUID(str(payload["sub"])),
-        )
+        RestockInput(variant_id=variant_id, quantity=data.quantity, actor=actor)
     )
     return InventoryResponse(**result.__dict__)
 
@@ -80,15 +77,11 @@ async def restock(
 async def reserve_stock(
     variant_id: uuid.UUID,
     data: ReserveRequest,
-    payload: dict = Depends(require_catalog_write),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: ReserveStockUseCase = Depends(get_reserve_stock_use_case),
 ) -> InventoryResponse:
     result = await use_case.execute(
-        ReserveStockInput(
-            variant_id=variant_id,
-            quantity=data.quantity,
-            actor_id=uuid.UUID(str(payload["sub"])),
-        )
+        ReserveStockInput(variant_id=variant_id, quantity=data.quantity, actor=actor)
     )
     return InventoryResponse(**result.__dict__)
 
@@ -97,14 +90,12 @@ async def reserve_stock(
 async def release_reservation(
     variant_id: uuid.UUID,
     data: ReleaseRequest,
-    payload: dict = Depends(require_catalog_write),
+    actor: ActorContext = Depends(get_actor_context),
     use_case: ReleaseReservationUseCase = Depends(get_release_reservation_use_case),
 ) -> InventoryResponse:
     result = await use_case.execute(
         ReleaseReservationInput(
-            variant_id=variant_id,
-            quantity=data.quantity,
-            actor_id=uuid.UUID(str(payload["sub"])),
+            variant_id=variant_id, quantity=data.quantity, actor=actor
         )
     )
     return InventoryResponse(**result.__dict__)

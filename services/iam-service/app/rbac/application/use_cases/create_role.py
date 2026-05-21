@@ -16,13 +16,13 @@ class CreateRoleUseCase:
             role = await uow.roles.add(
                 name=input.name,
                 description=input.description,
-                created_by=input.actor_id,
+                created_by=input.actor.actor_id,
             )
 
             # Emit domain event for audit logging (decoupled via UoW)
             uow.add_event(
                 RoleCreated(
-                    actor_id=input.actor_id,
+                    actor_id=input.actor.actor_id,
                     role_id=role.id,
                     name=role.name,
                     description=role.description,

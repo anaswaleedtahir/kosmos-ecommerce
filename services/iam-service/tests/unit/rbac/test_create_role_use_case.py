@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from shared.actor import ActorContext
 
 from app.rbac.application.dto import CreateRoleInput
 from app.rbac.application.use_cases.create_role import CreateRoleUseCase
@@ -20,7 +21,9 @@ async def test_create_role_success():
     actor_id = uuid.uuid4()
 
     result = await use_case.execute(
-        CreateRoleInput(name="analyst", description="BI team", actor_id=actor_id)
+        CreateRoleInput(
+            name="analyst", description="BI team", actor=ActorContext(actor_id=actor_id)
+        )
     )
 
     assert result.name == "analyst"
@@ -36,7 +39,9 @@ async def test_create_role_emits_domain_event():
     actor_id = uuid.uuid4()
 
     await use_case.execute(
-        CreateRoleInput(name="analyst", description=None, actor_id=actor_id)
+        CreateRoleInput(
+            name="analyst", description=None, actor=ActorContext(actor_id=actor_id)
+        )
     )
 
     # Check that a RoleCreated domain event was emitted
@@ -58,7 +63,11 @@ async def test_create_role_raises_when_name_taken():
 
     with pytest.raises(RoleAlreadyExistsError):
         await use_case.execute(
-            CreateRoleInput(name="editor", description=None, actor_id=uuid.uuid4())
+            CreateRoleInput(
+                name="editor",
+                description=None,
+                actor=ActorContext(actor_id=uuid.uuid4()),
+            )
         )
 
     assert uow.committed is False

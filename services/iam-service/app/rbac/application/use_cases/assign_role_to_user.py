@@ -22,13 +22,13 @@ class AssignRoleToUserUseCase:
                 raise RoleNotFoundError()
 
             await uow.assignments.assign_role_to_user(
-                user_id=user.id, role_id=role.id, assigned_by=input.actor_id
+                user_id=user.id, role_id=role.id, assigned_by=input.actor.actor_id
             )
 
             # Emit domain event for audit logging (decoupled via UoW)
             uow.add_event(
                 UserRoleAssigned(
-                    actor_id=input.actor_id,
+                    actor_id=input.actor.actor_id,
                     user_id=user.id,
                     user_email=user.email,
                     role_id=role.id,

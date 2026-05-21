@@ -24,7 +24,7 @@ class DeleteRoleUseCase:
             # Emit domain event for audit logging (decoupled via UoW)
             uow.add_event(
                 RoleDeleted(
-                    actor_id=input.actor_id,
+                    actor_id=input.actor.actor_id,
                     role_id=role.id,
                     name=role.name,
                 )

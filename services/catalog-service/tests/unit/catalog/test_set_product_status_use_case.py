@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from shared.actor import ActorContext
 
 from app.catalog.application.dto import SetProductStatusInput
 from app.catalog.application.use_cases.set_product_status import SetProductStatusUseCase
@@ -34,7 +35,7 @@ async def test_activating_inactive_product_fires_published_event(inactive_produc
         SetProductStatusInput(
             product_id=inactive_product.id,
             active=True,
-            actor_id=uuid.uuid4(),
+            actor=ActorContext(actor_id=uuid.uuid4()),
         )
     )
 
@@ -54,7 +55,7 @@ async def test_activating_already_active_product_does_not_fire_event(active_prod
         SetProductStatusInput(
             product_id=active_product.id,
             active=True,
-            actor_id=uuid.uuid4(),
+            actor=ActorContext(actor_id=uuid.uuid4()),
         )
     )
 
@@ -71,7 +72,7 @@ async def test_deactivating_product_sets_inactive(active_product):
         SetProductStatusInput(
             product_id=active_product.id,
             active=False,
-            actor_id=uuid.uuid4(),
+            actor=ActorContext(actor_id=uuid.uuid4()),
         )
     )
 
@@ -87,6 +88,6 @@ async def test_raises_when_product_not_found():
             SetProductStatusInput(
                 product_id=uuid.uuid4(),
                 active=True,
-                actor_id=uuid.uuid4(),
+                actor=ActorContext(actor_id=uuid.uuid4()),
             )
         )

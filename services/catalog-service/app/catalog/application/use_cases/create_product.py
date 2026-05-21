@@ -23,7 +23,7 @@ class CreateProductUseCase:
                 name=input.name,
                 description=input.description,
                 category_id=input.category_id,
-                created_by=input.actor_id,
+                created_by=input.actor.actor_id,
                 slug=input.slug,
                 storefront_metadata=input.storefront_metadata,
             )

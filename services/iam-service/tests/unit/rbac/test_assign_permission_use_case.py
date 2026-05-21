@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from shared.actor import ActorContext
 
 from app.rbac.application.dto import AssignPermissionInput
 from app.rbac.application.use_cases.assign_permission import AssignPermissionUseCase
@@ -31,7 +32,7 @@ async def test_assign_permission_creates_permission_and_assigns():
             role_id=role.id,
             resource="reports",
             action="read",
-            actor_id=uuid.uuid4(),
+            actor=ActorContext(actor_id=uuid.uuid4()),
         )
     )
 
@@ -56,7 +57,7 @@ async def test_assign_permission_reuses_existing_permission():
             role_id=role.id,
             resource="reports",
             action="read",
-            actor_id=uuid.uuid4(),
+            actor=ActorContext(actor_id=uuid.uuid4()),
         )
     )
 
@@ -73,7 +74,7 @@ async def test_assign_permission_raises_when_role_not_found():
                 role_id=uuid.uuid4(),
                 resource="reports",
                 action="read",
-                actor_id=uuid.uuid4(),
+                actor=ActorContext(actor_id=uuid.uuid4()),
             )
         )
 
@@ -98,7 +99,7 @@ async def test_assign_permission_raises_when_already_assigned():
                 role_id=role.id,
                 resource="reports",
                 action="read",
-                actor_id=uuid.uuid4(),
+                actor=ActorContext(actor_id=uuid.uuid4()),
             )
         )
 
@@ -113,7 +114,7 @@ async def test_assign_permission_emits_domain_event():
             role_id=role.id,
             resource="reports",
             action="read",
-            actor_id=uuid.uuid4(),
+            actor=ActorContext(actor_id=uuid.uuid4()),
         )
     )
 

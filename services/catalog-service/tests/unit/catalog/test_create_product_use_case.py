@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from shared.actor import ActorContext
 
 from app.catalog.application.dto import CreateProductInput
 from app.catalog.application.use_cases.create_product import CreateProductUseCase
@@ -32,7 +33,7 @@ async def test_creates_product_as_inactive(uow, category):
             name="Gaming Laptop",
             description="High-end",
             category_id=category.id,
-            actor_id=uuid.uuid4(),
+            actor=ActorContext(actor_id=uuid.uuid4()),
         )
     )
 
@@ -52,6 +53,6 @@ async def test_raises_when_category_not_found():
                 name="X",
                 description=None,
                 category_id=uuid.uuid4(),
-                actor_id=uuid.uuid4(),
+                actor=ActorContext(actor_id=uuid.uuid4()),
             )
         )
