@@ -68,6 +68,10 @@ class FakeProductRepository:
         self._variants: dict[uuid.UUID, ProductVariant] = {
             v.id: v for v in (variants or [])
         }
+        for variant in self._variants.values():
+            product = self._products.get(variant.product_id)
+            if product and not any(v.id == variant.id for v in product.variants):
+                product.variants.append(variant)
 
     async def find_by_id(self, id: uuid.UUID) -> Product | None:
         return self._products.get(id)
@@ -112,6 +116,8 @@ class FakeProductRepository:
 
     async def save(self, product: Product) -> None:
         self._products[product.id] = product
+        for variant in product.variants:
+            self._variants[variant.id] = variant
 
     async def add_variant(
         self,
@@ -136,7 +142,10 @@ class FakeProductRepository:
         self._variants[variant.id] = variant
 
     async def delete_variant(self, variant_id: uuid.UUID) -> None:
-        self._variants.pop(variant_id, None)
+        variant = self._variants.get(variant_id)
+        if variant:
+            variant.is_active = False
+            variant.set_default(False)
 
 
 class FakeCategoryRepository:

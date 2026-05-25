@@ -13,8 +13,18 @@ class DeleteVariantUseCase:
 
     async def execute(self, variant_id: uuid.UUID, actor: ActorContext) -> None:
         async with self._uow_factory() as uow:
-            if not await uow.products.find_variant_by_id(variant_id):
+            variant = await uow.products.find_variant_by_id(variant_id)
+            if not variant:
                 raise ProductVariantNotFoundError()
-            await uow.products.delete_variant(variant_id)
-            uow.add_audit_event(VariantSoftDeleted(actor=actor, variant_id=variant_id))
+            product = await uow.products.find_by_id(variant.product_id)
+            if not product:
+                raise ProductVariantNotFoundError()
+            product_variant = product.find_variant(variant_id)
+            if not product_variant:
+                raise ProductVariantNotFoundError()
+            if product.soft_delete_variant(product_variant):
+                uow.add_audit_event(
+                    VariantSoftDeleted(actor=actor, variant_id=variant_id)
+                )
+            await uow.products.save(product)
             await uow.commit()

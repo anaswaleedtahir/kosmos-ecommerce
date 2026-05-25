@@ -25,11 +25,14 @@ class UpdateVariantUseCase:
             product = await uow.products.find_by_id(variant.product_id)
             if not product:
                 raise ProductNotFoundError()
+            product_variant = product.find_variant(input.variant_id)
+            if not product_variant:
+                raise ProductVariantNotFoundError()
 
             if input.price is not None:
-                old_price = variant.price
+                old_price = product_variant.price
                 event = product.update_variant_price(
-                    variant, input.price, actor_id=input.actor.actor_id
+                    product_variant, input.price, actor_id=input.actor.actor_id
                 )
                 if event:
                     uow.add_event(event)
@@ -37,29 +40,33 @@ class UpdateVariantUseCase:
                     uow.add_audit_event(
                         VariantPriceChanged(
                             actor=input.actor,
-                            variant_id=variant.id,
+                            variant_id=product_variant.id,
                             old_price=old_price,
                             new_price=input.price,
                         )
                     )
 
-            if input.attributes is not None and input.attributes != variant.attributes:
-                variant.attributes = input.attributes
+            if input.attributes is not None and product.update_variant_attributes(
+                product_variant, input.attributes
+            ):
                 uow.add_audit_event(
                     VariantAttributesChanged(
                         actor=input.actor,
-                        variant_id=variant.id,
+                        variant_id=product_variant.id,
                         attributes=input.attributes,
                     )
                 )
-            if input.is_active is not None and input.is_active != variant.is_active:
-                if variant.is_active and not input.is_active:
-                    uow.add_audit_event(
-                        VariantSoftDeleted(actor=input.actor, variant_id=variant.id)
-                    )
-                variant.is_active = input.is_active
+            if input.is_active is not None:
+                was_active = product_variant.is_active
+                if product.set_variant_active(product_variant, input.is_active):
+                    if was_active and not input.is_active:
+                        uow.add_audit_event(
+                            VariantSoftDeleted(
+                                actor=input.actor, variant_id=product_variant.id
+                            )
+                        )
 
-            await uow.products.save_variant(variant)
+            await uow.products.save(product)
             await uow.commit()
 
-        return variant
+        return product_variant

@@ -84,6 +84,8 @@ class SqlAlchemyProductRepository:
         orm.status = product.status
         orm.storefront_metadata = product.storefront_metadata
         self._session.add(orm)
+        for variant in product.variants:
+            await self.save_variant(variant)
 
     async def add_variant(
         self,
@@ -129,4 +131,6 @@ class SqlAlchemyProductRepository:
             select(VariantORM).where(VariantORM.id == variant_id)
         )
         orm = result.scalar_one()
-        await self._session.delete(orm)
+        orm.is_active = False
+        orm.attributes = {**(orm.attributes or {}), "is_default": False}
+        self._session.add(orm)

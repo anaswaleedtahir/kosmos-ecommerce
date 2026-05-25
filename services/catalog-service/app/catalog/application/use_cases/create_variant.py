@@ -11,7 +11,8 @@ class CreateVariantUseCase:
 
     async def execute(self, input: CreateVariantInput) -> ProductVariant:
         async with self._uow_factory() as uow:
-            if not await uow.products.find_by_id(input.product_id):
+            product = await uow.products.find_by_id(input.product_id)
+            if not product:
                 raise ProductNotFoundError()
 
             if await uow.products.sku_exists(input.sku):
@@ -23,6 +24,8 @@ class CreateVariantUseCase:
                 price=input.price,
                 attributes=input.attributes,
             )
+            product.add_variant(variant)
+            await uow.products.save(product)
             uow.add_audit_event(
                 VariantCreated(
                     actor=input.actor,
