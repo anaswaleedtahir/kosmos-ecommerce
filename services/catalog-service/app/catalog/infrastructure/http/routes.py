@@ -192,7 +192,7 @@ async def delete_variant(
     actor: ActorContext = Depends(get_actor_context),
     use_case: DeleteVariantUseCase = Depends(get_delete_variant_use_case),
 ) -> None:
-    await use_case.execute(variant_id)
+    await use_case.execute(variant_id, actor)
 
 
 # ── Categories ────────────────────────────────────────────────────────────────

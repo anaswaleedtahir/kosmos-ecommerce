@@ -1,3 +1,4 @@
+from app.audit.domain.events import InventoryRestocked as InventoryRestockedAudit
 from app.inventory.application.dto import InventoryResult, RestockInput
 from app.inventory.domain.ports.unit_of_work import InventoryUnitOfWorkFactory
 
@@ -14,6 +15,15 @@ class RestockUseCase:
 
             inv.restock(input.quantity, actor_id=input.actor.actor_id)
             await uow.inventory.save(inv)
+            uow.add_audit_event(
+                InventoryRestockedAudit(
+                    actor=input.actor,
+                    inventory_id=inv.id,
+                    variant_id=inv.variant_id,
+                    quantity_added=input.quantity,
+                    quantity_on_hand=inv.quantity_on_hand,
+                )
+            )
             await uow.commit()
 
         return InventoryResult(

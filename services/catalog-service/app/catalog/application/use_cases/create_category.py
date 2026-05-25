@@ -1,3 +1,4 @@
+from app.audit.domain.events import CategoryCreated
 from app.catalog.application.dto import CreateCategoryInput
 from app.catalog.domain.entities.category import Category
 from app.catalog.domain.exceptions import (
@@ -23,6 +24,15 @@ class CreateCategoryUseCase:
                 name=input.name,
                 slug=input.slug,
                 parent_id=input.parent_id,
+            )
+            uow.add_audit_event(
+                CategoryCreated(
+                    actor=input.actor,
+                    category_id=category.id,
+                    name=category.name,
+                    slug=category.slug,
+                    parent_id=category.parent_id,
+                )
             )
             await uow.commit()
 

@@ -3,6 +3,7 @@ import uuid
 import pytest
 from shared.actor import ActorContext
 
+from app.audit.domain.events import ProductCreated
 from app.catalog.application.dto import CreateProductInput
 from app.catalog.application.use_cases.create_product import CreateProductUseCase
 from app.catalog.domain.entities.product import ProductStatus
@@ -41,6 +42,9 @@ async def test_creates_product_as_inactive(uow, category):
     assert result.status == ProductStatus.INACTIVE
     assert result.category_id == category.id
     assert uow.committed
+    assert len(uow.emitted_audit_events) == 1
+    assert isinstance(uow.emitted_audit_events[0], ProductCreated)
+    assert uow.emitted_audit_events[0].product_id == result.id
 
 
 async def test_raises_when_category_not_found():

@@ -3,6 +3,7 @@ import uuid
 import pytest
 from shared.actor import ActorContext
 
+from app.audit.domain.events import ProductActivated, ProductDeactivated
 from app.catalog.application.dto import SetProductStatusInput
 from app.catalog.application.use_cases.set_product_status import SetProductStatusUseCase
 from app.catalog.domain.entities.product import ProductStatus
@@ -43,6 +44,9 @@ async def test_activating_inactive_product_fires_published_event(inactive_produc
     assert len(uow.emitted_events) == 1
     assert isinstance(uow.emitted_events[0], ProductPublished)
     assert uow.emitted_events[0].product_id == inactive_product.id
+    assert len(uow.emitted_audit_events) == 1
+    assert isinstance(uow.emitted_audit_events[0], ProductActivated)
+    assert uow.emitted_audit_events[0].product_id == inactive_product.id
 
 
 async def test_activating_already_active_product_does_not_fire_event(active_product):
@@ -77,6 +81,9 @@ async def test_deactivating_product_sets_inactive(active_product):
     )
 
     assert result.status == ProductStatus.INACTIVE
+    assert len(uow.emitted_audit_events) == 1
+    assert isinstance(uow.emitted_audit_events[0], ProductDeactivated)
+    assert uow.emitted_audit_events[0].product_id == active_product.id
 
 
 async def test_raises_when_product_not_found():

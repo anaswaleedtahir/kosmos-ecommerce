@@ -1,5 +1,6 @@
+from app.audit.domain.events import ProductActivated, ProductDeactivated
 from app.catalog.application.dto import SetProductStatusInput
-from app.catalog.domain.entities.product import Product
+from app.catalog.domain.entities.product import Product, ProductStatus
 from app.catalog.domain.events import ProductPublished
 from app.catalog.domain.exceptions import ProductNotFoundError
 from app.catalog.domain.ports.unit_of_work import CatalogUnitOfWorkFactory
@@ -26,8 +27,16 @@ class SetProductStatusUseCase:
                             category_id=product.category_id,
                         )
                     )
+                    uow.add_audit_event(
+                        ProductActivated(actor=input.actor, product_id=product.id)
+                    )
             else:
+                was_active = product.status == ProductStatus.ACTIVE
                 product.deactivate()
+                if was_active:
+                    uow.add_audit_event(
+                        ProductDeactivated(actor=input.actor, product_id=product.id)
+                    )
 
             await uow.products.save(product)
             await uow.commit()

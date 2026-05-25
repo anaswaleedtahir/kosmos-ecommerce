@@ -1,3 +1,4 @@
+from app.audit.infrastructure.sqlalchemy_audit_logger import SqlAlchemyAuditLogger
 from app.inventory.application.use_cases.get_inventory import GetInventoryUseCase
 from app.inventory.application.use_cases.get_inventory_batch import (
     GetInventoryBatchUseCase,
@@ -20,6 +21,7 @@ def _uow_factory() -> SqlAlchemyInventoryUnitOfWork:
     return SqlAlchemyInventoryUnitOfWork(
         session_factory=async_session_factory,
         dispatchers=[_pubsub_dispatcher],
+        audit_logger_factory=lambda session: SqlAlchemyAuditLogger(session),
     )
 
 

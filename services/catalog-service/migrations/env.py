@@ -6,13 +6,14 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from app.audit.infrastructure.orm.audit_log import AuditLog
 from app.catalog.infrastructure.orm.category import Category
 from app.catalog.infrastructure.orm.product import Product, ProductVariant
 from app.config import settings
 from app.inventory.infrastructure.orm.inventory import Inventory
 from app.shared.infrastructure.db.base import Base
 
-_ = (Category, Product, ProductVariant, Inventory)
+_ = (AuditLog, Category, Product, ProductVariant, Inventory)
 
 config = context.config
 

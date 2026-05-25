@@ -3,6 +3,7 @@ import uuid
 import pytest
 from shared.actor import ActorContext
 
+from app.audit.domain.events import InventoryRestocked as InventoryRestockedAudit
 from app.inventory.application.dto import RestockInput
 from app.inventory.application.use_cases.restock import RestockUseCase
 from app.inventory.domain.events import InventoryRestocked
@@ -36,6 +37,10 @@ async def test_restock_emits_restocked_when_inventory_was_depleted(depleted_inve
     assert len(uow.emitted_events) == 1
     assert isinstance(uow.emitted_events[0], InventoryRestocked)
     assert uow.emitted_events[0].quantity_on_hand == 10
+    assert len(uow.emitted_audit_events) == 1
+    assert isinstance(uow.emitted_audit_events[0], InventoryRestockedAudit)
+    assert uow.emitted_audit_events[0].inventory_id == depleted_inventory.id
+    assert uow.emitted_audit_events[0].quantity_on_hand == 10
 
 
 async def test_restock_does_not_emit_when_already_in_stock():
@@ -52,6 +57,8 @@ async def test_restock_does_not_emit_when_already_in_stock():
     )
 
     assert uow.emitted_events == []
+    assert len(uow.emitted_audit_events) == 1
+    assert isinstance(uow.emitted_audit_events[0], InventoryRestockedAudit)
 
 
 async def test_restock_creates_inventory_when_missing():
@@ -68,3 +75,5 @@ async def test_restock_creates_inventory_when_missing():
     assert result.quantity_on_hand == 4
     assert len(uow.emitted_events) == 1
     assert isinstance(uow.emitted_events[0], InventoryRestocked)
+    assert len(uow.emitted_audit_events) == 1
+    assert isinstance(uow.emitted_audit_events[0], InventoryRestockedAudit)

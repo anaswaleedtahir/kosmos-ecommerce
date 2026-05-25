@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Callable
 
+from app.audit.domain.events import CatalogAuditEvent
 from app.inventory.domain.entities.inventory import Inventory
 from app.inventory.domain.events import InventoryEvent
 
@@ -61,11 +62,14 @@ class FakeInventoryUnitOfWork:
         self.inventory._on_save = self._track
         self.committed = False
         self._events: list[InventoryEvent] = []
+        self._audit_events: list[CatalogAuditEvent] = []
         self._tracked: list[Inventory] = []
         self.emitted_events: list[InventoryEvent] = []
+        self.emitted_audit_events: list[CatalogAuditEvent] = []
 
     async def __aenter__(self) -> "FakeInventoryUnitOfWork":
         self._events = []
+        self._audit_events = []
         self._tracked = []
         return self
 
@@ -75,13 +79,16 @@ class FakeInventoryUnitOfWork:
                 entity.collect_events()
             self._tracked.clear()
             self._events.clear()
+            self._audit_events.clear()
 
     async def commit(self) -> None:
         for entity in self._tracked:
             self._events.extend(entity.collect_events())
         self._tracked.clear()
         self.committed = True
+        self.emitted_audit_events.extend(self._audit_events)
         self.emitted_events.extend(self._events)
+        self._audit_events.clear()
         self._events.clear()
 
     async def rollback(self) -> None:
@@ -89,13 +96,22 @@ class FakeInventoryUnitOfWork:
             entity.collect_events()
         self._tracked.clear()
         self._events.clear()
+        self._audit_events.clear()
 
     def add_event(self, event: InventoryEvent) -> None:
         self._events.append(event)
 
+    def add_audit_event(self, event: CatalogAuditEvent) -> None:
+        self._audit_events.append(event)
+
     def collect_events(self) -> list[InventoryEvent]:
         events = self._events[:]
         self._events.clear()
+        return events
+
+    def collect_audit_events(self) -> list[CatalogAuditEvent]:
+        events = self._audit_events[:]
+        self._audit_events.clear()
         return events
 
     def _track(self, entity: Inventory) -> None:

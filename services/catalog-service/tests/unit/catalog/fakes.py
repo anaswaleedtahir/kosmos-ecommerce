@@ -3,6 +3,7 @@
 import uuid
 from datetime import datetime, timezone
 
+from app.audit.domain.events import CatalogAuditEvent
 from app.catalog.domain.entities.category import Category
 from app.catalog.domain.entities.product import Product, ProductStatus, ProductVariant
 from app.catalog.domain.events import CatalogEvent
@@ -181,28 +182,43 @@ class FakeCatalogUnitOfWork:
         self.categories = categories or FakeCategoryRepository()
         self.committed = False
         self._events: list[CatalogEvent] = []
+        self._audit_events: list[CatalogAuditEvent] = []
         self.emitted_events: list[CatalogEvent] = []
+        self.emitted_audit_events: list[CatalogAuditEvent] = []
 
     async def __aenter__(self) -> "FakeCatalogUnitOfWork":
         self._events = []
+        self._audit_events = []
         return self
 
     async def __aexit__(self, exc_type: object, *args: object) -> None:
         if exc_type:
             self._events.clear()
+            self._audit_events.clear()
 
     async def commit(self) -> None:
         self.committed = True
+        self.emitted_audit_events.extend(self._audit_events)
         self.emitted_events.extend(self._events)
+        self._audit_events.clear()
         self._events.clear()
 
     async def rollback(self) -> None:
         self._events.clear()
+        self._audit_events.clear()
 
     def add_event(self, event: CatalogEvent) -> None:
         self._events.append(event)
 
+    def add_audit_event(self, event: CatalogAuditEvent) -> None:
+        self._audit_events.append(event)
+
     def collect_events(self) -> list[CatalogEvent]:
         events = self._events[:]
         self._events.clear()
+        return events
+
+    def collect_audit_events(self) -> list[CatalogAuditEvent]:
+        events = self._audit_events[:]
+        self._audit_events.clear()
         return events

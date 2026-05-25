@@ -1,3 +1,4 @@
+from app.audit.infrastructure.sqlalchemy_audit_logger import SqlAlchemyAuditLogger
 from app.catalog.application.use_cases.create_category import CreateCategoryUseCase
 from app.catalog.application.use_cases.create_product import CreateProductUseCase
 from app.catalog.application.use_cases.create_variant import CreateVariantUseCase
@@ -24,6 +25,7 @@ def _uow_factory() -> SqlAlchemyCatalogUnitOfWork:
     return SqlAlchemyCatalogUnitOfWork(
         session_factory=async_session_factory,
         dispatchers=[_pubsub_dispatcher],
+        audit_logger_factory=lambda session: SqlAlchemyAuditLogger(session),
     )
 
 

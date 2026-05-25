@@ -1,3 +1,4 @@
+from app.audit.domain.events import ProductCreated
 from app.catalog.application.dto import CreateProductInput
 from app.catalog.domain.entities.product import Product
 from app.catalog.domain.exceptions import (
@@ -26,6 +27,15 @@ class CreateProductUseCase:
                 created_by=input.actor.actor_id,
                 slug=input.slug,
                 storefront_metadata=input.storefront_metadata,
+            )
+            uow.add_audit_event(
+                ProductCreated(
+                    actor=input.actor,
+                    product_id=product.id,
+                    name=product.name,
+                    category_id=product.category_id,
+                    slug=product.slug,
+                )
             )
             await uow.commit()
 

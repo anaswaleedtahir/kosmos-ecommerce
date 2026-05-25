@@ -1,3 +1,4 @@
+from app.audit.domain.events import VariantCreated
 from app.catalog.application.dto import CreateVariantInput
 from app.catalog.domain.entities.product import ProductVariant
 from app.catalog.domain.exceptions import ProductNotFoundError, SkuAlreadyExistsError
@@ -21,6 +22,15 @@ class CreateVariantUseCase:
                 sku=input.sku,
                 price=input.price,
                 attributes=input.attributes,
+            )
+            uow.add_audit_event(
+                VariantCreated(
+                    actor=input.actor,
+                    variant_id=variant.id,
+                    product_id=variant.product_id,
+                    sku=variant.sku,
+                    price=variant.price,
+                )
             )
             await uow.commit()
 
