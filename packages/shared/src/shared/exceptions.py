@@ -36,7 +36,9 @@ class ValidationError(DomainError):
 class RateLimitError(DomainError):
     status_code: ClassVar[int] = 429
 
-    def __init__(self, detail: str = "Rate limit exceeded.", *, retry_after: int) -> None:
+    def __init__(
+        self, detail: str = "Rate limit exceeded.", *, retry_after: int
+    ) -> None:
         super().__init__(detail)
         self.headers = {"Retry-After": str(retry_after)}
 

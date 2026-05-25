@@ -27,6 +27,7 @@ class SqlAlchemyRbacUnitOfWork:
     permissions: PermissionRepository
     assignments: AssignmentRepository
     users: UserReader
+
     def __init__(
         self,
         session_factory: async_sessionmaker[AsyncSession],

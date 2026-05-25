@@ -23,6 +23,7 @@ cp .env.example .env
 
 # Run migrations and start
 just migrate
+just seed
 just runserver          # http://localhost:8001
 ```
 
