@@ -8,6 +8,7 @@ from shared.logging import setup_dev_logging, setup_logging
 from shared.middleware import RequestResponseMiddleware
 from sqlalchemy import text
 
+from app.audit.infrastructure.http import routes as audit_routes
 from app.catalog.infrastructure.http import routes as catalog_routes
 from app.config import settings
 from app.inventory.infrastructure.http import routes as inventory_routes
@@ -71,4 +72,5 @@ register_domain_exception_handler(app)
 api_v1 = APIRouter(prefix="/api/v1")
 api_v1.include_router(catalog_routes.router)
 api_v1.include_router(inventory_routes.router)
+api_v1.include_router(audit_routes.router)
 app.include_router(api_v1)

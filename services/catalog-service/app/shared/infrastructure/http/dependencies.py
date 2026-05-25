@@ -32,6 +32,18 @@ async def require_catalog_write(
     return payload
 
 
+async def require_catalog_audit_read(
+    payload: dict = Depends(get_current_user),
+) -> dict:
+    permissions: list[str] = payload.get("permissions", [])
+    if "catalog:audit:read" not in permissions:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="catalog:audit:read permission required",
+        )
+    return payload
+
+
 async def get_actor_context(
     payload: dict = Depends(require_catalog_write),
 ) -> ActorContext:
