@@ -49,9 +49,3 @@ export function clearOrder() {
     // ignore
   }
 }
-
-export function generateOrderNo(): string {
-  const seg = Math.random().toString(36).slice(2, 6).toUpperCase();
-  const num = Math.floor(Math.random() * 90000 + 10000);
-  return `KSM-${seg}-${num}`;
-}

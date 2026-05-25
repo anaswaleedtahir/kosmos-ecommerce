@@ -8,11 +8,14 @@ import { Field } from '@kosmos/design/field';
 import { useBag } from '@/components/providers/BagProvider';
 import { eur } from '@/lib/format';
 import type { Product } from '@/lib/types';
-import { generateOrderNo, saveOrder, type Order } from '@/lib/order';
+import {
+  calculateOrderPricing,
+  resolveOrderLines,
+  submitOrderIntake,
+  type PayMethod,
+  type ShipMethod,
+} from '@/lib/order-intake';
 import { CheckoutHeader } from './CheckoutHeader';
-
-type ShipMethod = Order['ship'];
-type PayMethod = Order['pay'];
 
 const DEFAULT_INFO = {
   email: 'camille.aubert@kosmos.example',
@@ -41,47 +44,23 @@ export function CheckoutClient({ products }: { products: Product[] }) {
   });
   const [engrave, setEngrave] = useState('');
 
-  const resolved = lines
-    .map((b) => {
-      const p = products.find((x) => x.id === b.pid);
-      const v = p?.variants.find((x) => x.id === b.vid);
-      return p && v ? { ...b, p, v } : null;
-    })
-    .filter((x): x is NonNullable<typeof x> => x !== null);
-
-  const subtotal = resolved.reduce((s, l) => s + l.v.price * l.qty, 0);
-  const shipCost = ship === 'express' ? 22 : subtotal >= 120 ? 0 : 8;
-  const total = subtotal + shipCost;
+  const resolved = resolveOrderLines(lines, products);
+  const { subtotal, shipCost, total } = calculateOrderPricing(resolved, ship);
 
   // Empty-bag guard: send back home if nothing to check out.
   useEffect(() => {
     if (lines.length === 0) router.replace('/');
   }, [lines.length, router]);
 
-  const placeOrder = () => {
-    const order: Order = {
-      orderNo: generateOrderNo(),
+  const placeOrder = async () => {
+    await submitOrderIntake({
+      lines,
+      products,
       info,
       ship,
       pay,
       engrave,
-      subtotal,
-      shipCost,
-      total,
-      lines: resolved.map((l) => ({
-        pid: l.pid,
-        vid: l.vid,
-        qty: l.qty,
-        price: l.v.price,
-        label: l.v.label,
-        productName: l.p.name,
-        productImage: l.p.image,
-        family: l.p.family,
-        no: l.p.no,
-      })),
-      placedAt: new Date().toISOString(),
-    };
-    saveOrder(order);
+    });
     clear();
     router.push('/checkout/confirmation');
   };
@@ -280,7 +259,7 @@ export function CheckoutClient({ products }: { products: Product[] }) {
                 </>
               ) : (
                 <div className="py-12 px-6 border border-line text-center font-sans text-[14px] text-smoke">
-                  You'll be redirected to{' '}
+                  You&apos;ll be redirected to{' '}
                   {pay === 'paypal' ? 'PayPal' : 'Apple Pay'} to complete the
                   transaction.
                 </div>
@@ -478,7 +457,6 @@ function ShipChoice({
         border: `1px solid ${checked ? 'var(--color-ink)' : 'var(--color-line)'}`,
       }}
       className="grid items-center cursor-pointer py-5 px-6 gap-5"
-      // eslint-disable-next-line react/no-unknown-property
       data-testid="ship-choice"
     >
       <div
