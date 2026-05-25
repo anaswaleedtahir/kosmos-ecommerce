@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { CATEGORIES, getCategory } from '@/lib/catalog';
 import { getProducts } from '@/lib/catalog-api';
+import type { Category } from '@/lib/types';
 import { CollectionBody } from './CollectionBody';
 
 interface Params {
@@ -21,9 +22,9 @@ export default async function CollectionPage({
   const visibleCount =
     cat === 'all' ? allProducts.length : allProducts.filter((p) => p.cat === cat).length;
 
-  const meta = cat === 'all' ? null : getCategory(cat);
-  const heading = meta?.label ?? 'The maison';
-  const eyebrow = meta?.eyebrow ?? 'All disciplines';
+  const meta = cat === 'all' ? null : getCategory(cat as Category);
+  const heading = meta ? meta.label : 'The maison';
+  const eyebrow = meta ? meta.eyebrow : 'All disciplines';
 
   return (
     <div className="bg-paper">

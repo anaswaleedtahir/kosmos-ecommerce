@@ -8,7 +8,6 @@ import type { Category, Product } from '@/lib/types';
 
 const SORTS = [
   { id: 'featured', label: 'Featured' },
-  { id: 'newest', label: 'Newest' },
   { id: 'asc', label: 'Price · low to high' },
   { id: 'desc', label: 'Price · high to low' },
 ] as const;
@@ -138,15 +137,6 @@ export function CollectionBody({ cat, initialProducts }: Props) {
                 updateFilters((f) => ({ ...f, inStock: !f.inStock }))
               }
             />
-          </FilterGroup>
-          <FilterGroup title="Price · €">
-            <div className="flex items-center gap-3 font-sans text-[13px] text-smoke">
-              <span className="border-b border-line pb-1 min-w-[64px]">€ 32</span>
-              <span>—</span>
-              <span className="border-b border-line pb-1 min-w-[64px]">
-                € 540
-              </span>
-            </div>
           </FilterGroup>
           {hasActiveFilters && (
             <button

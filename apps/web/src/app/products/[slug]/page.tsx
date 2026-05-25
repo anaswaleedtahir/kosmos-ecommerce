@@ -34,7 +34,7 @@ export default async function ProductPage({
           className="text-inherit"
           transitionTypes={['nav-back']}
         >
-          {category?.label}
+          {category.label}
         </Link>
         <span className="mx-3">—</span>
         <span className="text-ink">{product.name}</span>
@@ -55,7 +55,7 @@ export default async function ProductPage({
             >
               The rest of the
               <br />
-              <em>{category?.label.toLowerCase()}</em>.
+              <em>{category.label.toLowerCase()}</em>.
             </h2>
             <CapsLink href={`/collection/${product.cat}`}>
               See the collection

@@ -14,8 +14,8 @@ export const FAMILIES: Record<Category, string[]> = {
   lipstick: ["Matte · Long wear", "Balm · Tinted"],
 };
 
-export function getCategory(id: string): CategoryMeta | undefined {
-  return CATEGORIES.find((c) => c.id === id);
+export function getCategory(id: Category): CategoryMeta {
+  return CATEGORIES.find((c) => c.id === id)!;
 }
 
 export function getDefaultVariant(p: Product): Variant {

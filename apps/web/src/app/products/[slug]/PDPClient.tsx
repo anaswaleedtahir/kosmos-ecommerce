@@ -109,7 +109,7 @@ export function PDPClient({ product }: { product: Product }) {
 
       <div style={{ paddingTop: 40, position: 'sticky', top: 100 }}>
         <div className="font-sans text-[11px] tracking-[0.22em] uppercase text-smoke mb-7">
-          {category?.label} · {product.no}
+          {category.label} · {product.no}
         </div>
         <h1
           className="font-display font-light text-ink"
