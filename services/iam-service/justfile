@@ -11,3 +11,6 @@ makemigrations message:
 
 migrate:
     uv run alembic upgrade head
+
+seed:
+    uv run python scripts/seed.py

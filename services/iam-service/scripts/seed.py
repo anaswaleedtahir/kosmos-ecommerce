@@ -10,7 +10,7 @@ workspace_root = Path(__file__).parent.parent
 if str(workspace_root) not in sys.path:
     sys.path.insert(0, str(workspace_root))
 
-from app.auth.infrastructure.orm.user import User  # noqa: E402, F401
+from app.auth.infrastructure.orm.user import User  # noqa: E402
 from app.config import settings  # noqa: E402
 from app.rbac.infrastructure.orm.association import (  # noqa: E402
     RolePermission,
@@ -25,36 +25,60 @@ from app.shared.infrastructure.db.session import async_session_factory  # noqa: 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+BUILTIN_ROLES = [
+    {
+        "name": "viewer",
+        "description": "Default signup role with no privileged permissions",
+        "permissions": set(),
+    },
+    {
+        "name": "catalog_manager",
+        "description": "Can mutate catalog products, variants, and inventory",
+        "permissions": {"catalog:write"},
+    },
+    {
+        "name": "catalog_auditor",
+        "description": "Can read catalog audit history without write access",
+        "permissions": {"catalog:audit:read"},
+    },
+    {
+        "name": "admin",
+        "description": "Super user bootstrap role for platform administrators",
+        "permissions": {"catalog:write", "catalog:audit:read"},
+    },
+]
+
+BUILTIN_PERMISSIONS = {
+    "catalog:write": ("catalog", "write"),
+    "catalog:audit:read": ("catalog:audit", "read"),
+}
+
 
 async def get_or_create_role(db, name: str, description: str) -> Role:
-    # 1. Check if role already exists in the database
     result = await db.execute(select(Role).where(Role.name == name))
     role = result.scalar_one_or_none()
 
-    # 2. If role doesn't exist, create a new one
-    if not role:
+    if role is None:
         role = Role(name=name, description=description, is_system=True)
         db.add(role)
         await db.flush()
-        logger.info(f"✅ Created role: {name}")
+        logger.info("Created role: %s", name)
     else:
-        # 3. If role exists, log and continue
-        logger.info(f"⏭️  Role already exists: {name}")
+        role.description = description
+        role.is_system = True
+        logger.info("Updated role: %s", name)
+
     return role
 
 
-async def get_or_create_permission(db, resource: str, action: str) -> Permission:
-    # 1. Generate the scope key from resource and action
-    scope_key = f"{resource}:{action}"
-
-    # 2. Check if permission already exists in the database
+async def get_or_create_permission(db, scope_key: str) -> Permission:
+    resource, action = BUILTIN_PERMISSIONS[scope_key]
     result = await db.execute(
         select(Permission).where(Permission.scope_key == scope_key)
     )
     permission = result.scalar_one_or_none()
 
-    # 3. If permission doesn't exist, create a new one
-    if not permission:
+    if permission is None:
         permission = Permission(
             resource=resource,
             action=action,
@@ -62,15 +86,16 @@ async def get_or_create_permission(db, resource: str, action: str) -> Permission
         )
         db.add(permission)
         await db.flush()
-        logger.info(f"✅ Created permission: {scope_key}")
+        logger.info("Created permission: %s", scope_key)
     else:
-        # 4. If permission exists, log and continue
-        logger.info(f"⏭️  Permission already exists: {scope_key}")
+        permission.resource = resource
+        permission.action = action
+        logger.info("Updated permission: %s", scope_key)
+
     return permission
 
 
-async def assign_permission_to_role(db, role: Role, permission: Permission) -> None:
-    # 1. Check if the permission is already assigned to the role
+async def ensure_role_permission(db, role: Role, permission: Permission) -> None:
     result = await db.execute(
         select(RolePermission).where(
             RolePermission.role_id == role.id,
@@ -78,10 +103,14 @@ async def assign_permission_to_role(db, role: Role, permission: Permission) -> N
         )
     )
 
-    # 2. If not already assigned, create the association
-    if not result.scalar_one_or_none():
-        db.add(RolePermission(role_id=role.id, permission_id=permission.id))
-        logger.info(f"✅ Assigned {permission.scope_key} → {role.name}")
+    if result.scalar_one_or_none() is None:
+        db.add(
+            RolePermission(
+                role_id=role.id,
+                permission_id=permission.id,
+            )
+        )
+        logger.info("Assigned %s -> %s", permission.scope_key, role.name)
 
 
 async def get_or_create_superuser(db, admin_role: Role) -> None:
@@ -90,75 +119,79 @@ async def get_or_create_superuser(db, admin_role: Role) -> None:
 
     if not email or not password:
         logger.info(
-            "⏭️  SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD unset — skipping super_user seed"
+            "SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD unset - skipping super user seed"
         )
         return
 
     result = await db.execute(select(User).where(User.email == email))
-    if result.scalar_one_or_none():
-        logger.info(f"⏭️  Super_user already exists: {email}")
-        return
+    user = result.scalar_one_or_none()
 
-    hasher = BcryptPasswordHasher()
-    user = User(
-        email=email,
-        password_hash=hasher.hash(password),
-        is_super_user=True,
-        is_active=True,
+    if user is None:
+        hasher = BcryptPasswordHasher()
+        user = User(
+            email=email,
+            password_hash=hasher.hash(password),
+            is_super_user=True,
+            is_active=True,
+        )
+        db.add(user)
+        await db.flush()
+        logger.info("Created super user: %s", email)
+    else:
+        user.is_super_user = True
+        user.is_active = True
+        logger.info("Reconciled super user flags: %s", email)
+
+    assignment = await db.execute(
+        select(UserRole).where(
+            UserRole.user_id == user.id,
+            UserRole.role_id == admin_role.id,
+        )
     )
-    db.add(user)
-    await db.flush()
-    db.add(UserRole(user_id=user.id, role_id=admin_role.id, assigned_by=user.id))
-    logger.info(f"✅ Created super_user: {email} (admin role assigned)")
+    if assignment.scalar_one_or_none() is None:
+        db.add(
+            UserRole(
+                user_id=user.id,
+                role_id=admin_role.id,
+                assigned_by=user.id,
+            )
+        )
+        logger.info("Assigned admin role to super user: %s", email)
 
 
 async def seed(db) -> None:
-    # ──────────── ROLES ──────────── #
-    viewer = await get_or_create_role(db, "viewer", "Default read-only role")
-    admin = await get_or_create_role(db, "admin", "Full access administrative role")
+    roles_by_name: dict[str, Role] = {}
+    for role_data in BUILTIN_ROLES:
+        role = await get_or_create_role(
+            db,
+            name=role_data["name"],
+            description=role_data["description"],
+        )
+        roles_by_name[role.name] = role
 
-    # ──────────── PERMISSIONS ──────────── #
-    permissions = [
-        ("user", "view"),
-        ("user", "create"),
-        ("user", "update"),
-        ("user", "delete"),
-        ("role", "view"),
-        ("role", "create"),
-        ("role", "delete"),
-        ("audit", "view"),
-    ]
+    permissions_by_scope: dict[str, Permission] = {}
+    for scope_key in BUILTIN_PERMISSIONS:
+        permission = await get_or_create_permission(db, scope_key)
+        permissions_by_scope[scope_key] = permission
 
-    created_permissions = []
-    for resource, action in permissions:
-        perm = await get_or_create_permission(db, resource, action)
-        created_permissions.append(perm)
+    for role_data in BUILTIN_ROLES:
+        role = roles_by_name[role_data["name"]]
+        for scope_key in role_data["permissions"]:
+            await ensure_role_permission(db, role, permissions_by_scope[scope_key])
 
-    # ──────────── ASSIGN PERMISSIONS TO ROLES ──────────── #
-    # viewer gets read-only permissions
-    viewer_scopes = {"user:view", "role:view"}
-    for perm in created_permissions:
-        if perm.scope_key in viewer_scopes:
-            await assign_permission_to_role(db, viewer, perm)
-
-    # admin gets everything
-    for perm in created_permissions:
-        await assign_permission_to_role(db, admin, perm)
-
-    # ──────────── SUPER_USER ──────────── #
-    await get_or_create_superuser(db, admin)
+    await get_or_create_superuser(db, roles_by_name["admin"])
 
     await db.commit()
-    logger.info("🎉 Seed completed successfully")
+    logger.info("Seed completed successfully")
 
 
-async def main():
+async def main() -> None:
     async with async_session_factory() as db:
         try:
             await seed(db)
-        except Exception as e:
+        except Exception:
             await db.rollback()
-            logger.error(f"❌ Seed failed: {e}")
+            logger.exception("Seed failed")
             raise
 
 

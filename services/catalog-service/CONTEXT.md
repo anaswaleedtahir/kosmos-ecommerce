@@ -73,7 +73,7 @@ Emitted by use cases via `uow.add_event(...)` to decouple mutation logic from au
 
 - **Reads (catalog / inventory)** — public, no token required.
 - **Mutations** — require a valid RS256 JWT (issued by iam-service) with the `catalog:write` permission claim.
-- **Audit reads** — require a valid RS256 JWT with the `catalog:audit:read` permission claim. Distinct from `catalog:write` so support/auditor roles can read history without write power. The permission row is created manually in iam after deploy via `POST /api/v1/admin/permissions`.
+- **Audit reads** — require a valid RS256 JWT with the `catalog:audit:read` permission claim. Distinct from `catalog:write` so support/auditor roles can read history without write power. The permission is seeded in iam for local/dev bootstrap and can also be managed through IAM admin role-permission assignment flows.
 - JWT verification uses JWKS fetch from iam-service at startup; public key is cached in-process.
 
 ---
