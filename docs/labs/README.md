@@ -36,7 +36,8 @@ When asked to evaluate a lab:
 
 | Lab | Status | Focus |
 |-----|--------|-------|
-| [001 Docker Compose Baseline](001-docker-compose-baseline.md) | needs_revision | Prove the local runtime before changing platform pieces. |
+| [001 Docker Compose Baseline](001-docker-compose-baseline.md) | passed | Prove the local runtime before changing platform pieces. |
+| [002 Service Container Runtime Ergonomics](002-service-container-runtime-ergonomics.md) | not_started | Improve service images and verify runtime filesystem paths. |
 
 ## Lab Template
 

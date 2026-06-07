@@ -2,11 +2,11 @@
 
 ## Status
 
-- State: needs_revision
+- State: passed
 - Learner marked complete: yes
 - Instructor evaluated: yes
 - Last evaluated by: Codex
-- Last evaluated at: 2026-06-04
+- Last evaluated at: 2026-06-07
 
 ## Objective
 
@@ -47,31 +47,51 @@ service processes before any Kubernetes or observability changes are introduced.
 
 Add learner evidence here. Keep entries concise and redact secrets.
 
-- Dependency Containers:
+- Dependency containers:
   - Redis
   - PostgreSQL
   - Google Pub/Sub
-
+- Application services:
+  - iam-service
+  - catalog-service
 - Commands for IAM local RSA keys:
   - `openssl genrsa -out keys/private_key.pem 2048`
   - `openssl rsa -in keys/private_key.pem -pubout -out keys/public_key.pem`
-
 - Docker Compose startup evidence:
-
   ```text
-  docker compose up -d
-  [+] up 6/6
-  ✔ Network kosmos-ecommerce_default             Created                                                                                                             0.0s
-  ✔ Container kosmos-ecommerce-redis-1           Started                                                                                                             0.3s
-  ✔ Container kosmos-ecommerce-pubsub-emulator-1 Started                                                                                                             0.2s
-  ✔ Container kosmos-ecommerce-postgres-1        Started                                                                                                             0.3s
-  ✔ Container kosmos-ecommerce-iam-service-1     Started                                                                                                             0.3s
-  ✔ Container kosmos-ecommerce-catalog-service-1 Started                                                                                                             0.3s
-
-  What's next:
-      Filter, search, and stream logs from all your Compose services
-      in one place with Docker Desktop's Logs view. docker-desktop://dashboard/logs
+  docker compose up -d                                                            [+] up 7/7
+   ✔ Network kosmos-ecommerce_default             Created                               0.0s
+   ✔ Volume kosmos-ecommerce_postgres_data        Created                               0.0s
+   ✔ Container kosmos-ecommerce-pubsub-emulator-1 Started                               0.2s
+   ✔ Container kosmos-ecommerce-redis-1           Healthy                               6.4s
+   ✔ Container kosmos-ecommerce-postgres-1        Healthy                               6.4s
+   ✔ Container kosmos-ecommerce-iam-service-1     Healthy                              11.3s
+   ✔ Container kosmos-ecommerce-catalog-service-1 Started                              11.4s
   ```
+- IAM can serve its public JWKS endpoint
+  ```text
+  curl 'http://127.0.0.1:8000/.well-known/jwks.json'
+  {"keys":[{"kty":"RSA","use":"sig","kid":"36c008c99da759ae","alg":"RS256","n":"1OBSt2PLCXIMc0b62UzKgbXyVR8q1Ykz9u8Htyf3RIvuyOdKuksUb6jmkesQ-GTDDIPaKyNFYeQvbJPdKmOKohnzB4WW69RlSO1whdpgXIE6DKrhNWS0YFqK5hCZGrf6aWK3WuDrT8P_Mv8RbPYmBetYh2tfkqfZmwQCj4x7cQbmcyMu_-WbkJBekrCb8Tdtn_4EM4MRVe5WWZ-CC4DurOp00BAh-wlJztjw4fol3UU2PldVw5QfjPOc6IbDyrvuwnbDXxV36CnyAjaYnCYen_-5EeBc8AJTaDxC6h_nhe63bPrRX9R-HrwKxUgLHNbWPnE1UM7Vmo_rV8u8dkfk6Q","e":"AQAB"}]}
+  ```
+- Catalog log line
+
+`{"timestamp": "2026-06-07T17:41:24.590428+00:00", "severity": "INFO", "name": "app.main", "message": "JWKS loaded from http://iam-service:8000/.well-known/jwks.json", "filename": "main.py", "lineno": 33, "request_id": "-"}`
+
+- Containers exited cleanly
+
+```text
+docker compose down
+[+] down 6/6
+ ✔ Container kosmos-ecommerce-pubsub-emulator-1 Removed                                                                                                             1.3s
+ ✔ Container kosmos-ecommerce-catalog-service-1 Removed                                                                                                             0.5s
+ ✔ Container kosmos-ecommerce-iam-service-1     Removed                                                                                                             0.4s
+ ✔ Container kosmos-ecommerce-redis-1           Removed                                                                                                             0.3s
+ ✔ Container kosmos-ecommerce-postgres-1        Removed                                                                                                             0.2s
+ ✔ Network kosmos-ecommerce_default             Removed                                                                                                             0.2s
+
+docker compose ps
+NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS
+```
 
 ## Instructor Evaluation
 
@@ -80,11 +100,9 @@ Automated checks:
 - `docker-compose ps`
   Expected signal: platform dependencies and app services are running or have an
   understandable failure state captured in the evidence log.
-
 - `curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8000/.well-known/jwks.json`
   Expected signal: IAM responds with an HTTP success status when the stack is
   running.
-
 - `curl http://localhost:8000/.well-known/jwks.json`
   Expected signal: the JSON response contains a `keys` array and no private key
   material.
@@ -99,12 +117,23 @@ Quiz:
 
 1. Why should we prove Docker Compose works before moving IAM and catalog into
    Kubernetes?
-2. What must be true before catalog can safely trust IAM-issued access tokens?
-3. Which startup failures should prevent a service from accepting traffic?
+   Ans: to understand what applications depend on one another and set them up
+   correctly later on.
+2. What must be true before catalog can safely trust IAM-issued access tokens?  
+   Ans: that catalog has the latest public keys served by the IAM service.
+3. Which startup failures should prevent a service from accepting traffic?  
+   Ans: critical dependency failures, such as missing RSA keys, unavailable
+   database connectivity, Redis failures for auth/session flows, or catalog
+   failing to load IAM JWKS.
 4. Why is the JWKS endpoint public while private key files must never be
    committed?
+   Ans: this endpoint serves the public keys corresponding to the private keys
+   used to sign access tokens.
 5. What is the difference between a container being started and the service being
    ready?
+   Ans: container started means the entrypoint triggered successfully, but the
+   service may still be unable to serve traffic if a dependency is down. Ready
+   means the service passed its startup/readiness checks and can accept traffic.
 
 ## Completion Log
 
@@ -118,3 +147,8 @@ Quiz:
   Evidence log still needs app/dependency container distinction, Compose startup
   summary, JWKS command result, catalog startup signal, clean shutdown result,
   and quiz answers.
+- 2026-06-07 - Instructor evaluation: passed. Evidence now shows platform
+  dependencies and application services starting under Docker Compose, IAM
+  serving a public JWKS response with no private key material, catalog loading
+  IAM JWKS at startup, and the stack shutting down cleanly. `docker compose ps`
+  was verified after shutdown and showed no running Compose services.
