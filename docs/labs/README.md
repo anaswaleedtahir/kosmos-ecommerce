@@ -36,7 +36,7 @@ When asked to evaluate a lab:
 
 | Lab | Status | Focus |
 |-----|--------|-------|
-| [001 Docker Compose Baseline](001-docker-compose-baseline.md) | not_started | Prove the local runtime before changing platform pieces. |
+| [001 Docker Compose Baseline](001-docker-compose-baseline.md) | needs_revision | Prove the local runtime before changing platform pieces. |
 
 ## Lab Template
 

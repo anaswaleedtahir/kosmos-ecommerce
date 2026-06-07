@@ -33,5 +33,44 @@ services:
     ports:
       - "8085:8085"
 
+  # ── Application Services ──────────────────────────────────────────────────
+
+  iam-service:
+    build:
+      context: .
+      dockerfile: services/iam-service/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./services/iam-service/.env.production
+    volumes:
+      - ./services/iam-service/keys:/app/iam-service/keys:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/.well-known/jwks.json', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  catalog-service:
+    build:
+      context: .
+      dockerfile: services/catalog-service/Dockerfile
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./services/catalog-service/.env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      iam-service:
+        condition: service_healthy
+
 volumes:
   postgres_data:

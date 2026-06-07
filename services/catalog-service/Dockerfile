@@ -1,22 +1,26 @@
-FROM python:3.13-slim
+FROM python:alpine
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
-RUN pip install uv
+# Workspace metadata and shared package (required by [tool.uv.sources])
+COPY pyproject.toml uv.lock ./
+COPY packages/shared packages/shared
+COPY services/catalog-service/pyproject.toml services/catalog-service/pyproject.toml
 
-COPY pyproject.toml .
-COPY packages/ /packages/
+RUN uv sync --frozen --no-cache --no-dev --no-editable --package catalog-service
 
-RUN uv sync --no-dev
+COPY services/catalog-service/app catalog-service/app/
+COPY services/catalog-service/migrations catalog-service/migrations/
+COPY services/catalog-service/alembic.ini catalog-service/alembic.ini
 
-COPY app/ ./app/
-COPY migrations/ ./migrations/
-COPY alembic.ini .
+WORKDIR /app/catalog-service
 
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/app/catalog-service
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 EXPOSE 8001
 
-CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["/app/.venv/bin/uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]

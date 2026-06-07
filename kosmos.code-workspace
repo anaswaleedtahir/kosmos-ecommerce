@@ -27,7 +27,8 @@
       "**/.pytest_cache": true,
       "**/.ruff_cache": true,
       "**/*.egg-info": true
-    }
+    },
+    "cursorpyright.analysis.typeCheckingMode": "basic"
   },
   "extensions": {
     "recommendations": [
