@@ -38,6 +38,7 @@ When asked to evaluate a lab:
 |-----|--------|-------|
 | [001 Docker Compose Baseline](001-docker-compose-baseline.md) | passed | Prove the local runtime before changing platform pieces. |
 | [002 Service Container Runtime Ergonomics](002-service-container-runtime-ergonomics.md) | passed | Improve service images and verify runtime filesystem paths. |
+| [003 Raw Kubernetes Workloads](003-raw-kubernetes-workloads.md) | not_started | Deploy IAM and catalog with raw local Kubernetes manifests. |
 
 ## Lab Template
 
