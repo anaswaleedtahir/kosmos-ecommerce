@@ -23,3 +23,6 @@ wheels/
 node_modules/
 .next/
 .expo/
+
+# secrets
+infra/k8s/local/*-secret.local.yaml

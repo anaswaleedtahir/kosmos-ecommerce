@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iam-service
+  namespace: kosmos
+data:
+  APP_ENV: production
+  APP_NAME: iam-service
+  APP_DEBUG: "false"
+  LOG_LEVEL: INFO
+  GCP_PROJECT_ID: local-kosmos
+  PUBSUB_TOPIC_ID: iam-events
+  PRIVATE_KEY_PATH: /run/secrets/iam/private_key.pem
+  PUBLIC_KEY_PATH: /run/secrets/iam/public_key.pem
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-service
+  namespace: kosmos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iam-service
+  template:
+    metadata:
+      labels:
+        app: iam-service
+    spec:
+      containers:
+        - name: iam-service
+          image: kosmos/iam-service:lab003
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: iam-service
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: iam-service
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: iam-service
+                  key: REDIS_URL
+          volumeMounts:
+            - name: rsa-keys
+              mountPath: /run/secrets/iam
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /.well-known/jwks.json
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: rsa-keys
+          secret:
+            secretName: iam-service
+            defaultMode: 256
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iam-service
+  namespace: kosmos
+spec:
+  selector:
+    app: iam-service
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
