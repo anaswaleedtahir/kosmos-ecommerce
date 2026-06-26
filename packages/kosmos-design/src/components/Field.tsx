@@ -16,7 +16,7 @@ export function Field({ label, value, onChange, className, ...rest }: FieldProps
       {label && (
         <label
           htmlFor={id}
-          className="block font-sans text-[11px] uppercase tracking-[0.18em] text-smoke mb-[10px]"
+          className="block font-sans text-[11px] uppercase tracking-[0.18em] text-smoke mb-2.5"
         >
           {label}
         </label>
