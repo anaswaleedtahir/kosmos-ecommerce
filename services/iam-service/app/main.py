@@ -18,9 +18,9 @@ Example:
 
 import logging
 from contextlib import asynccontextmanager
-from typing import Awaitable, cast
 
 from fastapi import APIRouter, FastAPI
+from redis_fastapi import FastAPIRedis
 from shared.exceptions import register_domain_exception_handler
 from shared.logging import setup_dev_logging, setup_logging
 from shared.middleware import RequestResponseMiddleware
@@ -101,7 +101,8 @@ async def lifespan(app: FastAPI):
 
     # 4. connect to redis
     try:
-        await cast(Awaitable[bool], redis_client.ping())
+        redis_client.set_client(app.state._redis.get_async_client())
+        await redis_client.ping()
         logger.info("Redis connection established")
     except Exception as e:
         raise RuntimeError(f"Redis connection failed: {e}")
@@ -126,8 +127,8 @@ async def lifespan(app: FastAPI):
     await async_engine.dispose()
     logger.info("Database connections closed")
 
-    # 2. close redis connection
-    await cast(Awaitable[None], redis_client.aclose())
+    # 2. release redis client reference; SDK closes the pool after this lifespan exits
+    redis_client.clear()
     logger.info("Redis connection closed")
 
     # 3. stop the pub/sub connection
@@ -143,6 +144,7 @@ app = FastAPI(
     redoc_url=None,
     lifespan=lifespan,
 )
+FastAPIRedis(app).lifespan()
 
 # Add request ID middleware
 app.add_middleware(RequestResponseMiddleware)

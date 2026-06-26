@@ -1,8 +1,8 @@
-from redis.asyncio import Redis
+from app.shared.infrastructure.cache.redis import RedisCommandClient
 
 
 class RedisRevocationStore:
-    def __init__(self, redis: Redis) -> None:
+    def __init__(self, redis: RedisCommandClient) -> None:
         self._redis = redis
 
     async def revoke(self, jti: str, ttl_seconds: int) -> None:

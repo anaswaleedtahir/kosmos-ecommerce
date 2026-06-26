@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import Field, PostgresDsn
+from pydantic import Field, PostgresDsn, RedisDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     test_database_url: PostgresDsn | None = None
     pool_size: int = 10
     max_overflow: int = 20
+
+    # ──────────── CACHE ──────────── #
+    redis_url: RedisDsn = "redis://localhost:6379/0"
 
     # ──────────── IAM / JWT ──────────── #
     iam_jwks_url: str = Field(default=...)

@@ -3,6 +3,8 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, FastAPI
+from redis_fastapi import FastAPIRedis
+from redis_fastapi import get_settings as get_redis_settings
 from shared.exceptions import register_domain_exception_handler
 from shared.logging import setup_dev_logging, setup_logging
 from shared.middleware import RequestResponseMiddleware
@@ -17,6 +19,9 @@ from app.shared.infrastructure.events.pubsub_publisher import ensure_topic
 from app.shared.infrastructure.http.jwks import jwks_client
 
 logger = logging.getLogger(__name__)
+
+redis_settings = get_redis_settings()
+redis_settings.url = str(settings.redis_url)
 
 
 @asynccontextmanager
@@ -62,6 +67,7 @@ app = FastAPI(
     redoc_url=None,
     lifespan=lifespan,
 )
+FastAPIRedis(app).lifespan()
 
 app.add_middleware(RequestResponseMiddleware)
 

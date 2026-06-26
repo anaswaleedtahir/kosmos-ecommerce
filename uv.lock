@@ -100,6 +100,7 @@ dependencies = [
     { name = "asyncpg" },
     { name = "cryptography" },
     { name = "fastapi", extra = ["standard"] },
+    { name = "fastapi-redis-sdk" },
     { name = "google-cloud-pubsub" },
     { name = "greenlet" },
     { name = "httpx" },
@@ -124,6 +125,7 @@ requires-dist = [
     { name = "asyncpg", specifier = ">=0.31.0" },
     { name = "cryptography", specifier = ">=46.0.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.128.8" },
+    { name = "fastapi-redis-sdk", specifier = ">=0.7.0" },
     { name = "google-cloud-pubsub", specifier = ">=2.35.0" },
     { name = "greenlet", specifier = ">=3.2.5" },
     { name = "httpx", specifier = ">=0.28.1" },
@@ -388,6 +390,21 @@ wheels = [
 ]
 
 [[package]]
+name = "fastapi-redis-sdk"
+version = "0.7.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "fastapi", extra = ["standard"] },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "redis" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/90/35/22064b1b7a3160a64e17498b823af3cae86f4e35c20274e719367861ccef/fastapi_redis_sdk-0.7.0.tar.gz", hash = "sha256:01bd948430dc97a1f4a3674fcbbf8316ce8856d1ee4dbc1fe669c7decca98084", size = 23187, upload-time = "2026-06-22T12:55:03.662Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3b/24/2c8c44ed7822090378295e03f9bd05f56c330ac29c847b4d38ea8be1c30e/fastapi_redis_sdk-0.7.0-py3-none-any.whl", hash = "sha256:07a685664900ddb72882d351ebc6b712d4aa9ba42b131e2010f47cc48785f4a1", size = 26662, upload-time = "2026-06-22T12:55:02.376Z" },
+]
+
+[[package]]
 name = "fastar"
 version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -610,13 +627,13 @@ dependencies = [
     { name = "bcrypt" },
     { name = "cryptography" },
     { name = "fastapi", extra = ["standard"] },
+    { name = "fastapi-redis-sdk" },
     { name = "google-cloud-pubsub" },
     { name = "greenlet" },
     { name = "passlib", extra = ["bcrypt"] },
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "pyjwt", extra = ["crypto"] },
-    { name = "redis" },
     { name = "shared" },
     { name = "sqlalchemy" },
 ]
@@ -638,13 +655,13 @@ requires-dist = [
     { name = "bcrypt", specifier = "==4.0.1" },
     { name = "cryptography", specifier = ">=46.0.5" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.128.8" },
+    { name = "fastapi-redis-sdk", specifier = ">=0.7.0" },
     { name = "google-cloud-pubsub", specifier = ">=2.35.0" },
     { name = "greenlet", specifier = ">=3.2.5" },
     { name = "passlib", extras = ["bcrypt"], specifier = ">=1.7.4" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pydantic-settings", specifier = ">=2.11.0" },
     { name = "pyjwt", extras = ["crypto"], specifier = ">=2.11.0" },
-    { name = "redis", specifier = ">=7.0.1" },
     { name = "shared", editable = "packages/shared" },
     { name = "sqlalchemy", specifier = ">=2.0.48" },
 ]
@@ -1217,11 +1234,11 @@ wheels = [
 
 [[package]]
 name = "redis"
-version = "7.3.0"
+version = "7.2.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/da/82/4d1a5279f6c1251d3d2a603a798a1137c657de9b12cfc1fba4858232c4d2/redis-7.3.0.tar.gz", hash = "sha256:4d1b768aafcf41b01022410b3cc4f15a07d9b3d6fe0c66fc967da2c88e551034", size = 4928081, upload-time = "2026-03-06T18:18:16.287Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7f/b3/fddae1baaf88100f0bd52e726d9dd140997f513258d22429b0da1d889170/redis-7.2.2.tar.gz", hash = "sha256:91125c133362620d9f2caec11c70e6febc2745bbb8a0ce15ad8542811bd2dfd1", size = 4909057, upload-time = "2026-06-05T08:26:46.931Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f0/28/84e57fce7819e81ec5aa1bd31c42b89607241f4fb1a3ea5b0d2dbeaea26c/redis-7.3.0-py3-none-any.whl", hash = "sha256:9d4fcb002a12a5e3c3fbe005d59c48a2cc231f87fbb2f6b70c2d89bb64fec364", size = 404379, upload-time = "2026-03-06T18:18:14.583Z" },
+    { url = "https://files.pythonhosted.org/packages/f6/f4/062f77785c590d62a323e92ba9d179ce80286c4f31369f799612d5d1d0f2/redis-7.2.2-py3-none-any.whl", hash = "sha256:8bd20727048c01a1fb4741f98c4194f5aa64781b7dd28386ca74ce6b41e42dcf", size = 396377, upload-time = "2026-06-05T08:26:45.186Z" },
 ]
 
 [[package]]
